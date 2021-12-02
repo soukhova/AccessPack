@@ -18,7 +18,7 @@ Anastasia Soukhov, Antonio Paez, Chris Higgins, and Moataz Mohamed.
 <!-- badges: end -->
 
 This data-package, includes 2016 Transportation Tomorrow Survey (TTS)
-data for the Greater Golden Horseshoe Area.
+data for the the Greater Golden Horseshoe Area.
 
 ![](Greater-Golden-Horseshoe-Map.png)
 
@@ -26,6 +26,6 @@ This includes the location of origins and destinations defined by
 Traffic Analysis Zones, the number of jobs and workers at each origin
 and destination, travel times by car (calculated via
 [`r5r`](https://github.com/ipeaGIT/r5r)), the proposed **spatial
-availability** accessibility function, the conventional accessibility
-function, and developed vignettes demonstrating a toy example and the
-TTS data example.
+availability** accessibility function (`SPavailability`), the
+conventional accessibility function, and developed vignettes
+demonstrating a toy example and the TTS data example.

@@ -1,7 +1,3 @@
 .Rproj.user
 data-raw
-extras
-.Rhistory
-.Rdata
-.httr-oauth
-.DS_Store
+not-used-yet
