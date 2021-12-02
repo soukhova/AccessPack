@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(AccessPack)
-library(tidyverse)
+library(dplyr)
 library(ggplot2)
 library(sf)
 ```
@@ -39,12 +39,12 @@ od_table <- toy_od_table %>%
 
 ```{r}
 od_table <- od_table %>%
-  mutate(V_ij = p_allocation(., 
-                                 o_id = "Origin", 
+  mutate(V_ij = sp_avail(., 
+                                 o_id = Origin, 
                                  d_id = "Destination", 
-                                 pop = "Population", 
-                                 opp = "Jobs",
-                                 f = "f"))
+                                 pop = Population, 
+                                 opp = Jobs,
+                                 f = f))
 ```
 
 Verify that the sum of all jobs allocated is consistent with the total number of jobs:
