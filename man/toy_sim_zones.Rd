@@ -9,9 +9,9 @@ A simple feature class (sfc) multipolygon object containing 12 rows and 5 variab
 \describe{
 \item{id}{The unique ID for each "Population" (from 1 to 9) or "Employment Center" (from 1 to 3) }
 \item{id_short}{A short unique ID}
-\item{number]{The population corresponding to the ID.}
-\item{type]{The number of jobs corresponding the ID.}
-\item{geometry}{The sfc polygon geometry (boundaries) of each ID.}]
+\item{number}{The population corresponding to the ID.}
+\item{type}{The number of jobs corresponding the ID.}
+\item{geometry}{The sfc polygon geometry (boundaries) of each ID.}
 }
 }
 \usage{

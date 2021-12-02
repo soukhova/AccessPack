@@ -1,5 +1,4 @@
 # The input is an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f
-#' Multiply two numbers
 #
 #' @param x A data frame with origin-destination information, including identifiers for origins, destinations, population, opportunities, and a pre-calculated impedance function
 #' @param o_id  A character string with the name of the column in data frame x that contains the unique origin identifiers
@@ -10,7 +9,6 @@
 #' @param alpha A number string with the name of the column in data frame x that contains the values of the impedance function
 #' @return A vector with the number of opportunities available to o_id from d_id
 #' @export
-#'
 
 p_allocation <- function(x, o_id, d_id, pop, opp, f, alpha = 1){
   x <- x %>%

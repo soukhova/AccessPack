@@ -29,3 +29,14 @@ and destination, travel times by car (calculated via
 availability** accessibility function (`SPavailability`), the
 conventional accessibility function, and developed vignettes
 demonstrating a toy example and the TTS data example.
+
+# Installation
+
+``` r
+if(!require(remotes)){
+    install.packages("remotes")
+    library(remotes)
+}
+remotes::install_github("soukhova/AccessPack",
+                         build_vignettes = TRUE)
+```

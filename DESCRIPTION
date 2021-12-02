@@ -1,10 +1,10 @@
 Package: AccessPack
-Title: What the Package Does (One Line, Title Case)
+Title: Spatial Availability Function and Sample Datasets including Real-World 2016 TTS Data and Trips To Work Hypothetical Toy Data
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+    person("Anastasia", "Soukhov", , "soukhoa@mcmaster.ca", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: This repository contains working files for a data-package to accompany the newly proposed  _proportionally allocated_ accessibility measure referred to as **spatial availability**. This measure is within the family of transport planning accessibility measures. This data-package is used in the  **Spatial Availability Measure** manuscript [here](https://github.com/soukhova/Spatial-Availability-Measure) (current a work in progress). 
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -12,3 +12,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

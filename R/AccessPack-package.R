@@ -55,20 +55,19 @@ NULL
 #' od_ft_tt
 #'
 #' This object contains the trips made from origin (TAZ) to destination (TAZ) by full-time workers to work destinations; it is sourced from the 2016 Transportation Tomorrow Survey (TTS) for the entire Greater Toronto and Hamilton Area (GTHA). Also contained within is the calculated car travel time for each trip assuming a 7:00 am departure from the centroid of the TAZ on Oct. 20 2021.
-
+#'
 #' @format A dataframe containing 103076 rows and 4 variables; each row represents a unique trip from origin TAZ to destination TAZ with associated features.
 #' \describe{
 #'   \item{Origin}{The unique ID of the origin traffic analysis zone (TAZ).}
 #'   \item{Destination}{The unique ID of the destination traffic analysis zone (TAZ).}
-#'   \item{Persons]{The number of people making this trip.}
-#'   \item{travel_time}{The car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.]
+#'   \item{Persons}{The number of people making this trip.}
+#'   \item{travel_time}{The car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.}
 #'}
 #' @docType data
 #' @keywords Origin Destination Trips Jobs Workers TTS 2016 GTHA Toronto Hamilton
 #' @name od_ft_tt
 #' @usage data(od_ft_tt)
-#' @source "2016 Transportation Tomorrow Survey" from [data management group]() accessed November 14 2021.
-#' @source travel times calculated using [`r5r`](https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html)
+#' @source "2016 Transportation Tomorrow Survey" from [data management group]() accessed November 14 2021. Travel times calculated using [`r5r`](https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html)
 "od_ft_tt"
 
 #' toronto_muni_bound
@@ -92,10 +91,10 @@ NULL
 #' \describe{
 #'   \item{Origin}{The unique ID for each "Population" from 1 to 9 }
 #'   \item{Destination}{The unique ID for each "Employment Center" from 1 to 3}
-#'   \item{Population]{The population corresponding to the "Population" ID.}
-#'   \item{Jobs]{The number of jobs corresponding to the "Employment Center" ID.}
+#'   \item{Population}{The population corresponding to the "Population" ID.}
+#'   \item{Jobs}{The number of jobs corresponding to the "Employment Center" ID.}
 #'   \item{distance}{The distance between origin to destination (unitless).}
-#'   \item{catchments}{A binary code indicating if the origin-destination trip is eligible or not (details on how this can be used within the vignette)).]
+#'   \item{catchments}{A binary code indicating if the origin-destination trip is eligible or not (details on how this can be used within the vignette)).}
 #'}
 #' @docType data
 #' @keywords Origin Destination Trips Jobs Workers Toy
@@ -111,9 +110,9 @@ NULL
 #' \describe{
 #'   \item{id}{The unique ID for each "Population" (from 1 to 9) or "Employment Center" (from 1 to 3) }
 #'   \item{id_short}{A short unique ID}
-#'   \item{number]{The population corresponding to the ID.}
-#'   \item{type]{The number of jobs corresponding the ID.}
-#'   \item{geometry}{The sfc polygon geometry (boundaries) of each ID.}]
+#'   \item{number}{The population corresponding to the ID.}
+#'   \item{type}{The number of jobs corresponding the ID.}
+#'   \item{geometry}{The sfc polygon geometry (boundaries) of each ID.}
 #'}
 #' @docType data
 #' @keywords Origin Destination Jobs Workers Toy
@@ -129,8 +128,8 @@ NULL
 #' \describe{
 #'   \item{Origin}{The unique ID for each "Population" from 1 to 9 }
 #'   \item{Destination}{The unique ID for each "Employment Center" from 1 to 3}
-#'   \item{Population]{The population corresponding to the "Population" ID.}
-#'   \item{trips]{The number of trips made from origin to destination.}]
+#'   \item{Population}{The population corresponding to the "Population" ID.}
+#'   \item{trips}{The number of trips made from origin to destination.}
 #'}
 #' @docType data
 #' @keywords Origin Destination Trips Jobs Workers Toy

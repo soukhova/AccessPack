@@ -9,8 +9,8 @@ A dataframe containing 27 rows and 3 variables; each row represents the number o
 \describe{
 \item{Origin}{The unique ID for each "Population" from 1 to 9 }
 \item{Destination}{The unique ID for each "Employment Center" from 1 to 3}
-\item{Population]{The population corresponding to the "Population" ID.}
-\item{trips]{The number of trips made from origin to destination.}]
+\item{Population}{The population corresponding to the "Population" ID.}
+\item{trips}{The number of trips made from origin to destination.}
 }
 }
 \usage{

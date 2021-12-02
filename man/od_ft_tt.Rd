@@ -9,14 +9,12 @@ A dataframe containing 103076 rows and 4 variables; each row represents a unique
 \describe{
 \item{Origin}{The unique ID of the origin traffic analysis zone (TAZ).}
 \item{Destination}{The unique ID of the destination traffic analysis zone (TAZ).}
-\item{Persons]{The number of people making this trip.}
-\item{travel_time}{The car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.]
+\item{Persons}{The number of people making this trip.}
+\item{travel_time}{The car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.}
 }
 }
 \source{
-"2016 Transportation Tomorrow Survey" from \url{data management group} accessed November 14 2021.
-
-travel times calculated using \href{https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html}{\code{r5r}}
+"2016 Transportation Tomorrow Survey" from \url{data management group} accessed November 14 2021. Travel times calculated using \href{https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html}{\code{r5r}}
 }
 \usage{
 data(od_ft_tt)

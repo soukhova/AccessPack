@@ -4,15 +4,15 @@
 \name{AccessPack-package}
 \alias{AccessPack}
 \alias{AccessPack-package}
-\title{AccessPack: What the Package Does (One Line, Title Case)}
+\title{AccessPack: Spatial Availability Function and Sample Datasets including Real-World 2016 TTS Data and Trips To Work Hypothetical Toy Data}
 \description{
-What the package does (one paragraph).
+This repository contains working files for a data-package to accompany the newly proposed _proportionally allocated_ accessibility measure referred to as **spatial availability**. This measure is within the family of transport planning accessibility measures. This data-package is used in the **Spatial Availability Measure** manuscript [here](https://github.com/soukhova/Spatial-Availability-Measure) (current a work in progress).
 }
 \references{
 \url{https://github.com/soukhova/Spatial-Availability-Measures-Package}
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Anastasia Soukhov \email{soukhoa@mcmaster.ca} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
 
 
 Antonio Paez, School of Earth, Environment and Society, McMaster University \email{paezha@mcmaster.ca}
