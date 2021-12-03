@@ -40,7 +40,7 @@ We are interested in considering  _supply_ from destinations in `W_{j}` but also
 ### 2016 TTS Data
 
 Let's extract the number of jobs, at each destination `j`; this is our `W_{j}`.
-Next, let's define our `f(C_{ij})`. In this simple example we will assume that it is just a binary function with a `theta` of 45 minutes; so  `A_{i}` is defined as the number of jobs at j that someone from origin i can access in 45 minutes. As this is a binary function; we're simply filtering out all trips that are over 30 minutes and summing up all the jobs within a destination.
+Next, let's define our `f(C_{ij})`. In this simple example we will assume that it is just a binary function with a `theta` of 45 minutes; so  `A_{i}` is defined as the number of jobs at j that someone from origin i can access in 45 minutes. As this is a binary function; we're simply filtering out all trips that are over 45 minutes and summing up all the jobs within a destination.
 
 ```{r}
 access_jobs <- od_ft_tt %>% filter(travel_time <= 45) %>% group_by(Destination) %>% summarise(jobs_i = sum(Persons, na.rm = T))

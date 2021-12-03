@@ -2,4 +2,6 @@
 
 export("%>%")
 export(sp_avail)
+export(sp_avail2)
+export(sp_avail3)
 importFrom(magrittr,"%>%")

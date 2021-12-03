@@ -39,9 +39,9 @@ od_table <- toy_od_table %>%
 
 ```{r}
 od_table <- od_table %>%
-  mutate(V_ij = sp_avail(., 
+  mutate(V_ij = sp_avail3(., 
                                  o_id = Origin, 
-                                 d_id = "Destination", 
+                                 d_id = Destination, 
                                  pop = Population, 
                                  opp = Jobs,
                                  f = f))
