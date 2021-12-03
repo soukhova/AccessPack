@@ -20,7 +20,8 @@ Anastasia Soukhov, Antonio Paez, Chris Higgins, and Moataz Mohamed.
 This data-package, includes 2016 Transportation Tomorrow Survey (TTS)
 data for the the Greater Golden Horseshoe Area.
 
-![](Greater-Golden-Horseshoe-Map.png)
+![The Golden Horseshoe in Ontario,
+Canada](images/Greater-Golden-Horseshoe-Map.png)
 
 This includes the location of origins and destinations defined by
 Traffic Analysis Zones, the number of jobs and workers at each origin

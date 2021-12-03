@@ -40,6 +40,7 @@
 
 
 <meta property="og:title" content="toy_trips — toy_trips" />
+<meta property="og:description" content="This object contains a hypothetical toy example of the number of trips for each Origin-Destination combination. Randomly generated." />
 
 
 
@@ -94,10 +95,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/AccessPack-Conventional.html">Conventional Accessibility Calculation</a>
+      <a href="../articles/AccessPack-Conventional.html">AccessPack-Conventional</a>
     </li>
     <li>
-      <a href="../articles/AccessPack-Spatial-Availability.html">Spatial Availability Accessibility Calculation</a>
+      <a href="../articles/AccessPack-Spatial-Availability.html">AccessPack-Spatial-Availability</a>
     </li>
   </ul>
 </li>
@@ -123,8 +124,10 @@
     </div>
 
     <div class="ref-description">
+    <p>This object contains a hypothetical toy example of the number of trips for each Origin-Destination combination. Randomly generated.</p>
     </div>
 
+    <pre class="usage"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>toy_trips</span><span class='op'>)</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
@@ -132,21 +135,8 @@
     <p>A dataframe containing 27 rows and 3 variables; each row represents the number of trips from "Population" to "Employment Center" with associated features.</p><dl>
 <dt>Origin</dt><dd><p>The unique ID for each "Population" from 1 to 9</p></dd>
 <dt>Destination</dt><dd><p>The unique ID for each "Employment Center" from 1 to 3</p></dd>
-<dt>Population]The population corresponding to the "Population" ID.
-trips]The number of trips made from origin to destination.]
-
-</dt><dd><p></p></dd>
-data(toy_trips)
-
-
-This object contains a hypothetical toy example of the number of trips for each Origin-Destination combination. Randomly generated.
-
-Destination
-Jobs
-Origin
-Toy
-Trips
-Workers
+<dt>Population</dt><dd><p>The population corresponding to the "Population" ID.</p></dd>
+<dt>trips</dt><dd><p>The number of trips made from origin to destination.</p></dd>
 
 </dl>
 
@@ -162,7 +152,7 @@ Workers
 
       <footer>
       <div class="copyright">
-  <p>Developed by First Last.</p>
+  <p>Developed by Anastasia Soukhov, Antonio Paez.</p>
 </div>
 
 <div class="pkgdown">

@@ -59,8 +59,7 @@ Aggregate available jobs by origin:
 availability <- od_table %>%
   group_by(Origin) %>%
   summarize(avail_jobs = sum(V_ij))
-availability %>% 
-  kable()
+availability
 ```
 
 Join the availability to the simulated_data:

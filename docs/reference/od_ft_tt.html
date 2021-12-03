@@ -40,6 +40,7 @@
 
 
 <meta property="og:title" content="od_ft_tt — od_ft_tt" />
+<meta property="og:description" content="This object contains the trips made from origin (TAZ) to destination (TAZ) by full-time workers to work destinations; it is sourced from the 2016 Transportation Tomorrow Survey (TTS) for the entire Greater Toronto and Hamilton Area (GTHA). Also contained within is the calculated car travel time for each trip assuming a 7:00 am departure from the centroid of the TAZ on Oct. 20 2021." />
 
 
 
@@ -94,10 +95,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/AccessPack-Conventional.html">Conventional Accessibility Calculation</a>
+      <a href="../articles/AccessPack-Conventional.html">AccessPack-Conventional</a>
     </li>
     <li>
-      <a href="../articles/AccessPack-Spatial-Availability.html">Spatial Availability Accessibility Calculation</a>
+      <a href="../articles/AccessPack-Spatial-Availability.html">AccessPack-Spatial-Availability</a>
     </li>
   </ul>
 </li>
@@ -123,8 +124,10 @@
     </div>
 
     <div class="ref-description">
+    <p>This object contains the trips made from origin (TAZ) to destination (TAZ) by full-time workers to work destinations; it is sourced from the 2016 Transportation Tomorrow Survey (TTS) for the entire Greater Toronto and Hamilton Area (GTHA). Also contained within is the calculated car travel time for each trip assuming a 7:00 am departure from the centroid of the TAZ on Oct. 20 2021.</p>
     </div>
 
+    <pre class="usage"><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>od_ft_tt</span><span class='op'>)</span></pre>
 
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
@@ -132,33 +135,14 @@
     <p>A dataframe containing 103076 rows and 4 variables; each row represents a unique trip from origin TAZ to destination TAZ with associated features.</p><dl>
 <dt>Origin</dt><dd><p>The unique ID of the origin traffic analysis zone (TAZ).</p></dd>
 <dt>Destination</dt><dd><p>The unique ID of the destination traffic analysis zone (TAZ).</p></dd>
-<dt>Persons]The number of people making this trip.
-travel_timeThe car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.]
-
-</dt><dd><p></p></dd>
-"2016 Transportation Tomorrow Survey" from <a href='data management group'>data management group</a> accessed November 14 2021.
-
-travel times calculated using <a href='https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html'><code>r5r</code></a>
-
-
-data(od_ft_tt)
-
-
-This object contains the trips made from origin (TAZ) to destination (TAZ) by full-time workers to work destinations; it is sourced from the 2016 Transportation Tomorrow Survey (TTS) for the entire Greater Toronto and Hamilton Area (GTHA). Also contained within is the calculated car travel time for each trip assuming a 7:00 am departure from the centroid of the TAZ on Oct. 20 2021.
-
-2016
-Destination
-GTHA
-Hamilton
-Jobs
-Origin
-TTS
-Toronto
-Trips
-Workers
+<dt>Persons</dt><dd><p>The number of people making this trip.</p></dd>
+<dt>travel_time</dt><dd><p>The car travel time from origin to destination assuming a 7:00 am departure from and to the TAZ centroids on Oct. 20 2021.</p></dd>
 
 </dl>
 
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p>"2016 Transportation Tomorrow Survey" from <a href='data management group'>data management group</a> accessed November 14 2021. Travel times calculated using <a href='https://cran.r-project.org/web/packages/r5r/vignettes/intro_to_r5r.html'><code>r5r</code></a></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -171,7 +155,7 @@ Workers
 
       <footer>
       <div class="copyright">
-  <p>Developed by First Last.</p>
+  <p>Developed by Anastasia Soukhov, Antonio Paez.</p>
 </div>
 
 <div class="pkgdown">
