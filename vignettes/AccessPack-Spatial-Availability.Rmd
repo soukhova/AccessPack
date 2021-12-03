@@ -40,11 +40,11 @@ od_table <- toy_od_table %>%
 ```{r}
 od_table <- od_table %>%
   mutate(V_ij = sp_avail(., 
-                                 o_id = Origin, 
-                                 d_id = Destination, 
-                                 pop = Population, 
-                                 opp = Jobs,
-                                 f = f))
+                         o_id = Origin, 
+                         d_id = Destination, 
+                         pop = Population, 
+                         opp = Jobs,
+                         f = f))
 ```
 
 Verify that the sum of all jobs allocated is consistent with the total number of jobs:
@@ -59,7 +59,8 @@ Aggregate available jobs by origin:
 availability <- od_table %>%
   group_by(Origin) %>%
   summarize(avail_jobs = sum(V_ij))
-availability
+availability %>% 
+  kable()
 ```
 
 Join the availability to the simulated_data:
@@ -70,7 +71,7 @@ simulated_data <- toy_sim_zones %>%
 ```
 
 Plot the availability estimates:
-```{r fig.height=3}
+```{r}
 avail_jobs_plot <- ggplot() +
   geom_sf(data = simulated_data %>% 
             filter(type == "population"),
@@ -100,7 +101,7 @@ simulated_data <- simulated_data %>%
 ```
 
 Plot the availability per person:
-```{r fig.height=3}
+```{r}
 avail_jobs_person_plot <- ggplot() +
   geom_sf(data = simulated_data %>% 
             filter(type == "population"),
@@ -111,9 +112,9 @@ avail_jobs_person_plot <- ggplot() +
             filter(type == "population"),
           aes(size = avail_jobs_per_person),
           shape = 2) +
-    geom_sf(data = simulated_data %>% 
+  geom_sf(data = simulated_data %>% 
             filter(type == "jobs"),
-              shape = 16) +
+          shape = 16) +
   scale_color_gradient2(midpoint = 1)
 
 
