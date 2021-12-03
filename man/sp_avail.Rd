@@ -2,22 +2,22 @@
 % Please edit documentation in R/sp_avail.R
 \name{sp_avail}
 \alias{sp_avail}
-\title{The input is an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f}
+\title{Third version of function with tidy evaluation. The input are the same:  an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f}
 \usage{
 sp_avail(x, o_id, d_id, pop, opp, f, alpha = 1)
 }
 \arguments{
 \item{x}{A data frame with origin-destination information, including identifiers for origins, destinations, population, opportunities, and a pre-calculated impedance function}
 
-\item{o_id}{A character string with the name of the column in data frame x that contains the unique origin identifiers}
+\item{o_id}{The name of the column in data frame x that contains the unique origin identifiers}
 
-\item{d_id}{A character string with the name of the column in data frame x that contains the unique destination identifiers}
+\item{d_id}{The name of the column in data frame x that contains the unique destination identifiers}
 
-\item{pop}{A character string with the name of the column in data frame x that contains the population}
+\item{pop}{The name of the column in data frame x that contains the population}
 
-\item{opp}{A character string with the name of the column in data frame x that contains the opportunities}
+\item{opp}{The name of the column in data frame x that contains the opportunities}
 
-\item{f}{A character string with the name of the column in data frame x that contains the values of the impedance function}
+\item{f}{The name of the column in data frame x that contains the values of the impedance function}
 
 \item{alpha}{A number string with the name of the column in data frame x that contains the values of the impedance function}
 }
@@ -25,5 +25,5 @@ sp_avail(x, o_id, d_id, pop, opp, f, alpha = 1)
 A vector with the number of opportunities available to o_id from d_id
 }
 \description{
-The input is an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f
+Third version of function with tidy evaluation. The input are the same:  an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f
 }
