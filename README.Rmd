@@ -19,7 +19,10 @@ All files are still a collaborative work in process. Contributors: Anastasia Sou
 This data-package, includes 2016 Transportation Tomorrow Survey (TTS) data for the the Greater Golden Horseshoe Area.
 
 
-![](docs/images/Greater-Golden-Horseshoe-Map.png)
+```{r echo=FALSE}
+knitr::include_graphics("images/Greater-Golden-Horseshoe-Map.gif")
+```
+__Figure 1.__ _The Golden Horseshoe in Ontario, Canada_
 
 This includes the location of origins and destinations defined by Traffic Analysis Zones, the number of jobs and workers at each origin and destination, travel times by car (calculated via [`r5r`](https://github.com/ipeaGIT/r5r)), the proposed **spatial availability** accessibility function (`SPavailability`), the conventional accessibility function, and developed vignettes demonstrating a toy example and the TTS data example.
 
