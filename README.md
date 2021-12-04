@@ -9,7 +9,7 @@ referred to as **spatial availability**. This measure is within the
 family of transport planning accessibility measures. This data-package
 is used in the **Spatial Availability Measure** manuscript
 [here](https://github.com/soukhova/Spatial-Availability-Measure)
-(current a work in progress).
+(currently a work in progress).
 
 All files are still a collaborative work in process. Contributors:
 Anastasia Soukhov, Antonio Paez, Chris Higgins, and Moataz Mohamed.
@@ -20,16 +20,17 @@ Anastasia Soukhov, Antonio Paez, Chris Higgins, and Moataz Mohamed.
 This data-package, includes 2016 Transportation Tomorrow Survey (TTS)
 data for the the Greater Golden Horseshoe Area.
 
-![The Golden Horseshoe in Ontario,
-Canada](images/Greater-Golden-Horseshoe-Map.png)
+<img src="images/Greater-Golden-Horseshoe-Map.png" width="531" />
+
+**Figure 1.** *The Greater Golden Horseshoe in Ontario, Canada*
 
 This includes the location of origins and destinations defined by
 Traffic Analysis Zones, the number of jobs and workers at each origin
 and destination, travel times by car (calculated via
 [`r5r`](https://github.com/ipeaGIT/r5r)), the proposed **spatial
-availability** accessibility function (`SPavailability`), the
-conventional accessibility function, and developed vignettes
-demonstrating a toy example and the TTS data example.
+availability** accessibility function (`SP_avail`), the conventional
+accessibility function, and developed vignettes demonstrating a toy
+example and the 2016 TTS data example.
 
 # Installation
 

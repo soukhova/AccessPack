@@ -2,9 +2,9 @@
 % Please edit documentation in R/sp_avail.R
 \name{sp_avail}
 \alias{sp_avail}
-\title{Third version of function with tidy evaluation. The input are the same:  an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f}
+\title{Input OD-table with Origins, Destinations, Population, Jobs, Catchment binary identification, and a pre-calculated impedance function f}
 \usage{
-sp_avail(x, o_id, d_id, pop, opp, f, alpha = 1)
+sp_avail(x, o_id, d_id, pop, opp, r = NULL, f, alpha = 1)
 }
 \arguments{
 \item{x}{A data frame with origin-destination information, including identifiers for origins, destinations, population, opportunities, and a pre-calculated impedance function}
@@ -17,6 +17,8 @@ sp_avail(x, o_id, d_id, pop, opp, f, alpha = 1)
 
 \item{opp}{The name of the column in data frame x that contains the opportunities}
 
+\item{r}{A character string with the name of the column in data frame x that contains}
+
 \item{f}{The name of the column in data frame x that contains the values of the impedance function}
 
 \item{alpha}{A number string with the name of the column in data frame x that contains the values of the impedance function}
@@ -25,5 +27,5 @@ sp_avail(x, o_id, d_id, pop, opp, f, alpha = 1)
 A vector with the number of opportunities available to o_id from d_id
 }
 \description{
-Third version of function with tidy evaluation. The input are the same:  an OD-table with Origins, Destinations, Population, Jobs, and a pre-calculated impedance function f
+Input OD-table with Origins, Destinations, Population, Jobs, Catchment binary identification, and a pre-calculated impedance function f
 }

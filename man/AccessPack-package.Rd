@@ -6,7 +6,7 @@
 \alias{AccessPack-package}
 \title{AccessPack: Spatial Availability Function and Sample Datasets including Real-World 2016 TTS Data and Trips To Work Hypothetical Toy Data}
 \description{
-This repository contains working files for a data-package to accompany the newly proposed  _proportionally allocated_ accessibility measure referred to as **spatial availability**. This measure is within the family of transport planning accessibility measures. This data-package is used in the  **Spatial Availability Measure** manuscript [here](https://github.com/soukhova/Spatial-Availability-Measure) (current a work in progress).
+This repository contains working files for a data-package to accompany the newly proposed _proportionally allocated_ accessibility measure referred to as **spatial availability**. This measure is within the family of transport planning accessibility measures. This data-package is used in the **Spatial Availability Measure** manuscript [here](https://github.com/soukhova/Spatial-Availability-Measure) (current a work in progress).
 }
 \references{
 \url{https://github.com/soukhova/Spatial-Availability-Measures-Package}

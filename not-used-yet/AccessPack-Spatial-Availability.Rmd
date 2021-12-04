@@ -120,3 +120,60 @@ avail_jobs_person_plot <- ggplot() +
 avail_jobs_person_plot
 ```
 Some population centers have almost two jobs available per person, and others less than one job available per person. This does not mean that people are not taking some of the jobs. It means that controlling for the cost of reaching jobs, they are worse off than those with more jobs spatially available. 
+
+
+
+
+
+
+
+--------------------
+
+
+--------------------------------------
+
+We are interested in considering  _supply_ from destinations in `W_{j}` but also considering  _demand_ from origins in the impedance function to define origin-based 'available potential accessibility'. From our perspective, supply and demand should be balanced and proportional; this will add more meaning to this origin-based accessibility measure. But first a simple example.
+
+
+
+\noindent where $W_j$ is the number of opportunities at location $j$, $c_{ij}$ is a measure of the cost of moving between $i$ and $j$, and $f(\cdot)$ is an impedance (or distance-decay) function (a monotonically non-increasing or decreasing function of $c_{ij}$). In this way, the accessibility $A_i$ is the weighted sum of opportunities that can be reached from location $i$. It is well known that this is a gravity-type measure of accessibility, and it is a widely used tool in transportation studies.
+
+Accessibility $A_i$, by summing the jobs in the neighborhood of $i$ (the neighborhood is defined by the impedance function), is an estimation of the total number of jobs that can be reached from $i$. 
+
+As we have discussed proportional allocations (see for instance Paez, Higgins, Vivona, 2019), it has become increasingly clear that a lot of multiple-counting happens when calculating $A_i$ for $i=1,\cdots,n$, since every opportunity that can be reached from every $i$ enters the sum.
+
+For this reason, we have thought of a related concept that we are provisionally calling _spatial availability_, and that we think of as a measure of accessibility with capacity constraints.
+
+How does this work? It all comes down to proportional allocation. We wish to allocate jobs proportionally to population, based on the number of jobs and the distance from population.
+
+This is our current framework.
+
+
+
+
+### 2016 TTS Data
+
+Let's extract the number of jobs, at each destination `j`; this is our `W_{j}`.
+Next, let's define our `f(C_{ij})`. In this simple example we will assume that it is just a binary function with a `theta` of 45 minutes; so  `A_{i}` is defined as the number of jobs at j that someone from origin i can access in 45 minutes. As this is a binary function; we're simply filtering out all trips that are over 45 minutes and summing up all the jobs within a destination.
+
+```{r}
+access_jobs <- od_ft_tt %>% filter(travel_time <= 45) %>% group_by(Destination) %>% summarise(jobs_i = sum(Persons, na.rm = T))
+```
+
+Now, we associate this object to a unique origins object to get `A_{i}` for each origin. I also add average travel time as a check to ensure average times are still under the `theta`.
+```{r}
+gtha_taz_i <- gtha_taz %>% merge(access_jobs, by.x=c("GTA06"), by.y=c("Destination"), all.x=T) 
+```
+
+Plot origin accessibility
+```{r}
+ggplot() +
+  geom_sf(data = gtha_taz_i, 
+          aes(fill= jobs_i), color = NA) +
+    scale_fill_distiller(palette = "Spectral")
+```
+
+### Toy Data
+
+dsd
+
