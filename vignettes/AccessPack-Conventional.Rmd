@@ -7,20 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r knitr-setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
-
-```{r setup, message = FALSE, warning = FALSE}
-library(AccessPack)
-library(dplyr)
-library(ggplot2)
-library(sf)
-```
-
 
 ## Conventional Accessibility
 
@@ -46,11 +38,14 @@ In this section we present a numerical toy example to calculate conventional acc
 
 Load packages needed for the example:
 ```{r message = FALSE, warning = FALSE}
+library(AccessPack)
+library(dplyr)
+library(ggplot2)
 library(kableExtra)
 library(patchwork)
 library(sf)
-library(tidyverse)
 ```
+
 This is the setup for the example: three employment centers and nine population centers.
 ```{r ,  message = FALSE, warning = FALSE,  fig.height=3, fig.width=6}
 ggplot(data = toy_sim_zones) + 
@@ -243,25 +238,27 @@ $$
 In this section we present the same numerical example as presented above but additionally calculate _spatial availability_ $V_ij$. We conclude by contrasting the two measures in the final section. 
 
 First we assign an impedance function:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 beta <- 0.0015
 toy_od_table <- toy_od_table %>%
   mutate(f = exp(-beta * distance))
 ```
 
 Next we calculate the _spatial availability_ for each origin:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_od_table <- toy_od_table %>%
+  mutate(catch = 1) %>%
   mutate(V_ij = sp_avail(., 
-                          o_id = Origin, 
-                          d_id = Destination, 
-                          pop = Population, 
-                          opp = Jobs,
-                          f = f))
+                         o_id = Origin, 
+                         d_id = Destination, 
+                         pop = Population, 
+                         opp = Jobs,
+                         r = catch,
+                         f = f))
 ```
 
 Verify that the sum of all jobs allocated is consistent with the total number of jobs:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 sum(toy_od_table$V_ij)
 
 sum_jobs <- toy_od_table %>% group_by(Destination) %>% summarise(Jobs = mean(Jobs))
@@ -271,7 +268,7 @@ sum(sum_jobs$Jobs, na.rm = T)
 The total number of jobs is preserved.
 
 Aggregate available jobs by origin:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 availability <- toy_od_table %>%
   group_by(Origin) %>%
   summarize(avail_jobs = sum(V_ij))
@@ -279,14 +276,14 @@ availability
 ```
 
 Join the availability to the simulated zones:
-```{r , warning=FALSE, message=FALSE}
+```{r , warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   left_join(availability, 
             by = c("id" = "Origin"))
 ```
 
 Plot the availability estimates:
-```{r, , warning=FALSE, message=FALSE, fig.height=3, fig.width=6}
+```{r, , warning=FALSE, fig.height=3, fig.width=6}
 toy_avail_jobs_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -311,13 +308,13 @@ toy_avail_jobs_plot
 How do we interpret this? Accessibility is the number of jobs that can be reached at a given cost. Here, the total number of jobs is a constant. Population center 5 has the greatest availability, due to being a large population center that is moreover relatively close to jobs.
 
 Since the total number of jobs is constant, we can calculate the available jobs per person:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_jobs_per_person = avail_jobs/number)
 ```
 
 Plot the availability per person:
-```{r, warning=FALSE, message=FALSE, fig.height=3, fig.width=6}
+```{r, warning=FALSE, fig.height=3, fig.width=6}
 toy_avail_jobs_person_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -328,9 +325,9 @@ toy_avail_jobs_person_plot <- ggplot() +
             filter(type == "population"),
           aes(size = avail_jobs_per_person),
           shape = 2) +
-    geom_sf(data = toy_sim_zones_access %>% 
+  geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
-              shape = 16) +
+          shape = 16) +
   scale_color_gradient2(midpoint = 1)+
   guides(size = "none")
 
@@ -345,18 +342,20 @@ Some population centers have almost two jobs available per person, and others le
 We can also examine the pool of workers available to each employment center by considering the workers as opportunities and the jobs as the population.
 
 Calculate the proportional allocation of jobs to population (referred to as $W_ij$):
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_od_table <- toy_od_table %>%
+  mutate(catch = 1) %>%
   mutate(W_ij = sp_avail(., 
-                                 o_id = Destination, 
-                                 d_id = Origin, 
-                                 pop = Jobs, 
-                                 opp = Population,
-                                 f = f))
+                         o_id = Destination, 
+                         d_id = Origin, 
+                         pop = Jobs, 
+                         opp = Population,
+                         r = catch,
+                         f = f))
 ```
 
 Verify that the sum of all population allocated is consistent with the total number of population:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 sum(toy_od_table$W_ij)
 
 sum_pop <- toy_od_table %>% group_by(Origin) %>% summarise(Population = mean(Population))
@@ -366,7 +365,7 @@ sum(sum_pop$Population, na.rm = T)
 The total population is preserved.
 
 Aggregate available workers by employment center:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 availability <- toy_od_table %>%
   group_by(Destination) %>%
   summarize(avail_workers = sum(W_ij))
@@ -374,14 +373,14 @@ availability
 ```
 
 Join the availability to the toy_sim_zones_access:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   left_join(availability, 
             by = c("id" = "Destination"))
 ```
 
 Plot the availability estimates:
-```{r, warning=FALSE, message=FALSE, fig.height=3, fig.width=6}
+```{r, warning=FALSE}
 toy_avail_workers_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
@@ -395,7 +394,7 @@ toy_avail_workers_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
           aes(size = number),
-              shape = 17) +
+          shape = 17) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1)+
   guides(size = "none")
@@ -404,13 +403,13 @@ toy_avail_workers_plot
 ```
 
 Since the total population is constant, we can calculate the available workers per job:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_workers_per_job = avail_workers/number)
 ```
 
 Plot the population availability per job:
-```{r, warning=FALSE, message=FALSE, fig.height=3, fig.width=6}
+```{r, warning=FALSE}
 toy_avail_workers_job_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
@@ -423,7 +422,7 @@ toy_avail_workers_job_plot <- ggplot() +
           shape = 1) +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
-              shape = 17) +
+          shape = 17) +
   scale_color_gradient2(midpoint = 1)+
   guides(size = "none")
 
@@ -436,31 +435,31 @@ In this section we introduce catchment/eligibility constraints. Due to differenc
 
 ```{r, include=FALSE}
 # Create catchments for visualization:
- catchment_1 <- toy_sim_zones_access %>% filter(id == "Employment Center 1" | 
-                          id == "Population 1" | 
-                          id == "Population 2") %>%
+catchment_1 <- toy_sim_zones_access %>% filter(id == "Employment Center 1" | 
+                                                 id == "Population 1" | 
+                                                 id == "Population 2") %>%
   st_union %>% 
   st_convex_hull()  %>%
-            st_buffer(480) 
+  st_buffer(480) 
 
 catchment_2 <- toy_sim_zones_access %>% filter(id == "Employment Center 2" | 
-                          id == "Population 3" | 
-                          id == "Population 4" | 
-                          id == "Population 5" | 
-                          id == "Population 7" | 
-                          id == "Population 8") %>% 
+                                                 id == "Population 3" | 
+                                                 id == "Population 4" | 
+                                                 id == "Population 5" | 
+                                                 id == "Population 7" | 
+                                                 id == "Population 8") %>% 
   st_union %>% 
   st_convex_hull()  %>%
-            st_buffer(480)
+  st_buffer(480)
 
 catchment_3 <- toy_sim_zones_access %>% filter(id == "Employment Center 3" | 
-                          id == "Population 5" | 
-                          id == "Population 6" |  
-                          id == "Population 8" | 
-                          id == "Population 9") %>% 
+                                                 id == "Population 5" | 
+                                                 id == "Population 6" |  
+                                                 id == "Population 8" | 
+                                                 id == "Population 9") %>% 
   st_union %>% 
   st_convex_hull()  %>%
-            st_buffer(480)
+  st_buffer(480)
 ```
 
 ```{r, echo = FALSE}
@@ -497,19 +496,19 @@ ggplot(data = toy_sim_zones_access) +
 ```
 
 Calculate the proportional allocation of opportunities but now with catchment constraint (referred to as $V_ij_r$):
-```{r, , warning=FALSE, message=FALSE}
+```{r, , warning=FALSE}
 toy_od_table <- toy_od_table %>%
   mutate(V_ij_r = sp_avail(.,
-                               o_id = Origin,
-                               d_id = Destination,
-                               pop = Population,
-                               opp = Jobs,
-                               r = catchments,
-                               f = f))
+                           o_id = Origin,
+                           d_id = Destination,
+                           pop = Population,
+                           opp = Jobs,
+                           r = catchments,
+                           f = f))
 ```
 
 Verify that the sum of all jobs allocated is consistent with the total number of jobs:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 sum(toy_od_table$V_ij_r)
 
 sum_jobs <- toy_od_table %>% group_by(Destination) %>% summarise(Jobs = mean(Jobs))
@@ -519,7 +518,7 @@ sum(sum_jobs$Jobs, na.rm = T)
 The total number of jobs is preserved.
 
 Repeat the availability calculation:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 availability <- toy_od_table %>%
   group_by(Origin) %>%
   summarize(avail_r = sum(V_ij_r))
@@ -527,16 +526,16 @@ availability
 ```
 
 Join the availability to the toy_sim_zones_access:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   left_join(availability,
             by = c("id" = "Origin"))
 ```
 
 Plot the availability estimates:
-```{r, warning=FALSE, message=FALSE, fig.height=6, fig.width=6}
+```{r, warning=FALSE}
 toy_avail_r_plot <- ggplot() +
-    geom_sf(data = catchment_1,
+  geom_sf(data = catchment_1,
           fill = "yellow",
           alpha = 0.05) +
   geom_sf(data = catchment_1,
@@ -575,15 +574,15 @@ toy_avail_jobs_plot / toy_avail_r_plot
 ```
 
 Available jobs per person with catchment/eligibility conditions:
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_r_per_person = avail_r/number)
 ```
 
 Plot the availability per person:
-```{r, warning=FALSE, message=FALSE, fig.height=6, fig.width=6}
+```{r, warning=FALSE}
 toy_avail_r_person_plot <- ggplot() +
-    geom_sf(data = catchment_1,
+  geom_sf(data = catchment_1,
           fill = "yellow",
           alpha = 0.05) +
   geom_sf(data = catchment_1,
@@ -610,9 +609,9 @@ toy_avail_r_person_plot <- ggplot() +
             filter(type == "population"),
           aes(size = avail_r_per_person),
           shape = 2) +
-    geom_sf(data = toy_sim_zones_access %>%
+  geom_sf(data = toy_sim_zones_access %>%
             filter(type == "jobs"),
-              shape = 16) +
+          shape = 16) +
   scale_color_gradient2(midpoint = 1)+
   guides(size = "none")
 
@@ -623,7 +622,7 @@ toy_avail_jobs_person_plot / toy_avail_r_person_plot
 
 Below we compare the conventional accessibility and the initial _spatial availability_ use case. 
 
-```{r, warning=FALSE, message=FALSE, fig.height=6, fig.width=6}
+```{r, warning=FALSE}
 toy_c_access_jobs_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -678,7 +677,7 @@ However, ultimately if the global number of opportunities (jobs in our case) is 
 
 Additionally, it can be used to equivalently compare the accessible _spatial availability_ of opportunities for all origins globally; this is an important topic in equity analysis. For instance, considering the two remote small population centers in the top left corner it is evident that from the figure below that in one of the population centers there are _more_ jobs available than the people within the population center. 
 
-```{r, warning=FALSE, message=FALSE, fig.height=3, fig.width=6}
+```{r, warning=FALSE}
 toy_avail_jobs_person_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -689,10 +688,10 @@ toy_avail_jobs_person_plot <- ggplot() +
             filter(type == "population"),
           aes(size = avail_jobs_per_person),
           shape = 2) +
-    geom_sf(data = toy_sim_zones_access %>% 
+  geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
-              shape = 16,
-            size = 5) +
+          shape = 16,
+          size = 5) +
   scale_color_gradient2(midpoint = 1)+
   guides(size = "none")
 

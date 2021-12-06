@@ -21,6 +21,8 @@ library(ggplot2)
 library(sf)
 ```
 
+DATA PREP USE EPSG:32617
+
 ## Preamble on Spatial Availability Accessibility calculation
 dsds
 
@@ -39,11 +41,13 @@ od_table <- toy_od_table %>%
 
 ```{r}
 od_table <- od_table %>%
+  mutate(catch = 1) %>%
   mutate(V_ij = sp_avail(., 
                          o_id = Origin, 
                          d_id = Destination, 
                          pop = Population, 
                          opp = Jobs,
+                         r = catch,
                          f = f))
 ```
 
