@@ -1,7 +1,0 @@
-pandoc: 2.14.0.3
-pkgdown: 2.0.1
-pkgdown_sha: ~
-articles:
-  introducing-spatial-availability: introducing-spatial-availability.html
-last_built: 2021-12-09T20:12Z
-
