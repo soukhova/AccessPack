@@ -1,42 +1,46 @@
 ---
-title: "AccessPack-Conventional"
+title: "Introducing Spatial Availability"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{AccessPack-Conventional}
+  %\VignetteIndexEntry{Introducing Spatial Availability}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r knitr-setup, include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 6
 )
 ```
 
-## Conventional Accessibility
+Accessibility analysis is widely employed in transportation, geography, public health, and many other areas. It is a relatively simple concept whose appeal derives from combining the spatial distribution of opportunities and the cost of reaching them. Recent works have aimed at making accessibility easier to interpret. This vignette introduces the concept of spatial _availability_, a form of singly-constrained accessibility that preserves the number of opportunities available, and therefore leads to more interpretable results. 
 
-We have been experimenting with proportional allocation in accessibility measures, and have discussed the concept of _spatial availability_. Briefly, consider the following conventional accessibility measure $A_i$ :
+## Accessibility Analysis
+
+Most accessibility measures (excluding utility-based measures) are derived from the gravity model, and are known as _gravity-based_ accessibility. Briefly, consider the following conventional accessibility measure $A_i$ :
 $$
 A_i = \sum_{j=1}^JW_jf(c_{ij})
 $$
 
-Where,
+\noindent where:
+
 - $i$ is a set of origin locations.
 - $j$ is a set of destination locations.
 - $W_j$ is the number of opportunities at location $j$. These are opportunities for activity and add some sort of _supply_ to the area;
 - $c_{ij}$ is a measure of the cost of moving between $i$ and $j$
 - $f(\cdot)$ is an impedance (or distance-decay) function (a monotonically non-increasing or decreasing function of $c_{ij}$).
 
-In this way, the conventional accessibility value $A_i$ is the weighted sum of opportunities that can be reached from location $i$. Summing the opportunities in the neighborhood of $i$ (the neighborhood is defined by the impedance function) estimates of the total number of opportunities that can be reached from $i$ at a certain cost. It is well known that this is a gravity-type measure of accessibility, and it is a widely used tool in transportation studies. This is our starting point.
+The accessibility value $A_i$, it can be seen, is the weighted sum of opportunities that can be reached from location $i$, given the cost of travel $c_{ij}$ and an impedance function. Summing the opportunities in the neighborhood of $i$ (the neighborhood is defined by the impedance function) estimates of the total number of opportunities that can be reached from $i$ at a certain cost. Depending on the impedance function, the measure could be cumulative opportunities (if $f(\cdot)$ is a binary or indicator function) or a more traditional gravity measure, for instance with a Gaussian impedance function or an inverse cost impedance function.
 
-The following is a toy example in which first we will calculate conventional accessibility, $A_i$, and explore how this measure falls short. We will then calculate _Spatial Availability_, our proposed accessibility measure, and discuss how it improves interpretability. 
+We use a toy example to introduce the concept of _spatial availability_, and we will use a conventional accessibility measure for comparison. In this way, we aim to show their differences and discuss how spatial availability improves interpretability in the analysis of spatially dispersed opportunities. 
 
 ### Numerical Toy Example
 
-In this section we present a numerical toy example to calculate conventional accessibility $A_i$.
+In this section we present a simple numerical example.
 
-Load packages needed for the example:
+Begin by loading the packages needed for the example:
 ```{r message = FALSE, warning = FALSE}
 library(AccessPack)
 library(dplyr)
@@ -46,8 +50,8 @@ library(patchwork)
 library(sf)
 ```
 
-This is the setup for the example: three employment centers and nine population centers.
-```{r ,  message = FALSE, warning = FALSE,  fig.height=3, fig.width=6}
+The setup for the example is a simple system with three employment centers and nine population centers.
+```{r ,  message = FALSE, warning = FALSE}
 ggplot(data = toy_sim_zones) + 
   geom_sf(aes(color = type,
               shape = type,
@@ -80,86 +84,108 @@ ggsave("images/figure-1.png",
 ```
 
 This is the distribution of jobs and population:
-```{r message = FALSE, warning = FALSE}
+```{r echo = FALSE, eval = FALSE}
 toy_sim_zones %>%
   st_drop_geometry() %>%
   mutate(fig = "") %>%
   kable(format = "latex",
         booktabs = TRUE) %>%
-  column_spec(5, image = "images/figure-1.png") %>%
-  collapse_rows(columns = 5, latex_hline = "major", valign = "middle")
+  column_spec(5, 
+              image = "images/figure-1.png") %>%
+  collapse_rows(columns = 5, 
+                latex_hline = "major", 
+                valign = "middle")
 ```
-
-Now, let's calculate conventional accessibility $A_i$ where we will yield how many jobs (opportunities) are accessibility to each population center. 
-
-As our $c_{ij}$ is unitless 'distance'; let's assume an impedance function is simply a binary switch in which on jobs which are at distances equal to or less than the mean (`r mean(AccessPack::toy_od_table$distance)` units) from population centers are considered; meaning any employment center which is further than than this mean is not considered in evaluating the job accessibility for each origin.  
 
 ```{r message = FALSE, warning = FALSE}
-# using the origin-destination table (OD) of all origin to destination trips; filter in only jobs which are mean distance or less away from a population center and sum number of jobs available in each origin (population center)
-c_accessibility <- AccessPack::toy_od_table %>% 
-  filter(distance <= mean(distance)) %>% 
-  group_by(Origin) %>% 
-  summarise(c_access_jobs = sum(Jobs))
-
-#pass conventional accessibility calculation into the spatial object (toy_sim_zones)
-toy_sim_zones_access  <- toy_sim_zones %>% 
-  merge(c_accessibility, by.x ="id", by.y = "Origin", all.x=T) 
+toy_sim_zones %>%
+  st_drop_geometry() %>%
+  kable(format = "html")
 ```
 
-Plot origin conventional accessibility
-```{r, message = FALSE, warning = FALSE, fig.height=3, fig.width=6}
+The accessibility to employment of each of the population centers can be calculated using the expression above for $A_i$. As noted, this yields the number of jobs (opportunities) that are accessible (i.e., can be reached) from each population center, given the cost. 
+
+In this example we use the straight line distance between the population and jobs for $c_{ij}$, and a negative exponential function with $\beta = 0.0015$. The impedance function is calculated as follows:
+```{r}
+beta <- 0.0015
+toy_od_table <- toy_od_table %>%
+  mutate(f = exp(-beta * distance))
+```
+
+Calculate the accessibility:
+```{r message = FALSE, warning = FALSE}
+# using the origin-destination table (OD) of all origin to destination trips; filter in only jobs which are mean distance or less away from a population center and sum number of jobs available in each origin (population center)
+
+c_accessibility <- toy_od_table %>% 
+  mutate(A_ij = f * Jobs) %>%
+  group_by(Origin) %>%
+  summarise(A_i = sum(A_ij))
+```
+
+Join the results to the geography of the system:
+```{r}
+#pass conventional accessibility calculation into the spatial object (toy_sim_zones)
+toy_sim_zones_access  <- toy_sim_zones %>% 
+  left_join(c_accessibility, 
+            by = c("id" = "Origin")) 
+```
+
+Plot the accessibility to employment in the example;
+```{r, message = FALSE, warning = FALSE}
 toy_c_access_jobs_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
-          aes(color = c_access_jobs,
-              size = c_access_jobs),
+          aes(color = A_i,
+              size = A_i),
           shape = 17) +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
-          aes(size = c_access_jobs),
+          aes(size = A_i),
           shape = 2) +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
-          aes(size = number *3,
-              shape = )) +
+          aes(size = number)) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1) +
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_c_access_jobs_plot 
 ```
 
-Here we see of the three employment centers (black dots), the bigger the dot the larger number of jobs available. We also see nine population centers (triangles), where the bigger the triangle the larger the population and the darker the orange the more 'job accessibility' that center has access to. 
+Here we see of the three employment centers (black circles), the bigger the circle the larger number of jobs available. We also see nine population centers (triangles), where the size of the symbol is proportional to the accessibility to jobs. 
 
-- Population centers (triangles) in the middle of the map have access to all three employment centers and thus have the highest amount of job accessibility (i.e. Population center  `r toy_sim_zones_access %>% slice_max(c_access_jobs, n=1) %>% pull(id_short)` has the maximum job accessibility `r  toy_sim_zones_access %>% slice_max(c_access_jobs, n=1) %>% pull(c_access_jobs)`);
+- Population centers (triangles) in the middle of the map are relatively close to all three employment centers and thus have the highest levels of job accessibility (i.e. Population center  `r toy_sim_zones_access %>% slice_max(A_i, n=1) %>% pull(id_short)` has the highest accessibility `r  toy_sim_zones_access %>% slice_max(A_i, n=1) %>% pull(A_i)`);
 
-- Population centers (triangles) near the left edge of the map (only in proximity to the small employment center) have the least amount of job accessibility (i.e. Population centers  `r toy_sim_zones_access %>% slice_min(c_access_jobs, n=1) %>% pull(id_short)` has the minimum job accessibility `r toy_sim_zones_access %>% slice_min(c_access_jobs, n=1, with_ties = F) %>% pull(c_access_jobs)`);
+- Population centers (triangles) near the left edge of the map (only in proximity to the small employment center) have the lowest levels of job accessibility (i.e. Population centers  `r toy_sim_zones_access %>% slice_min(A_i, n=1) %>% pull(id_short)` has the lowest accessibility `r toy_sim_zones_access %>% slice_min(A_i, n=1, with_ties = F) %>% pull(A_i)`);
 
-**What are the issues?**
+## What are the issues?
 
-What does a maximum of `r  max(toy_sim_zones_access$c_access_jobs, na.rm=T)` and a minimum of `r  min(toy_sim_zones_access$c_access_jobs, na.rm=T)` job accessibility mean exactly? We can normalize this value by considering population centers, employment centres, or the average global population or jobs. However, the value is not sensitive to the population at the origin seeking the opportunity (in this case jobs). For this reason, the value of $A_i$ is difficult to interpret. 
+What does the highest level of `r  max(toy_sim_zones_access$A_i, na.rm=T)` and the lowest value of `r  min(toy_sim_zones_access$A_i, na.rm=T)` job accessibility mean exactly? We can normalize this value by considering population centers, employment centres, or the average global population or jobs. However, the value is not sensitive to the population at the origin seeking the opportunity (in this case jobs). For this reason, the value of $A_i$ is difficult to interpret. 
 
-This is where our proposed _spatial availability_ measure is introduced. In the following five sections we will explore this new measure using the toy example introduced. First, we will describe the measure. Second, we will calculate the _spatial availability_ from the perspective of the population. Then, we will calculate the _spatial availability_ from the perspective of the employment centers. Next, we calculate the _spatial availability_ for a segment of specialized working population. Finally, we will compare the conventional accessibility calculation to the proposed _spatial availability_.
+This is where the proposed measure of spatial availability measure can help. In the following five sections we will explore this new measure using the toy example introduced. First, we will describe the measure. Second, we will calculate the _spatial availability_ from the perspective of the population. Then, we will calculate the _spatial availability_ from the perspective of the employment centers. Next, we calculate the _spatial availability_ for a segment of specialized working population. Finally, we will compare the conventional accessibility calculation to the proposed _spatial availability_.
 
 ## Spatial Availability
 
-As we have discussed proportional allocations (see for instance Paez, Higgins, Vivona, 2019), it has become increasingly clear that a lot of multiple-counting happens when calculating conventional accessibility $A_i$ for $i=1,\cdots,n$, since every opportunity that can be reached from every $i$ enters the sum. This obscures the interpretability of  $A_i$ and fails to answer questions like: "so I live in a population center with maximum job accessibility... but how many jobs can I actually access?"
+As research on proportional allocation (see for instance Paez, Higgins, Vivona, [2019](https://doi.org/10.1371/journal.pone.0218773)), it has become increasingly clear that multiple-counting is commonplace when calculating conventional accessibility $A_i$ for $i=1,\cdots,n$, since every opportunity that can be reached from every $i$ enters the sum. This obscures the interpretability of $A_i$ and fails to answer questions like: "so I live in a population center with very high job accessibility, but so do my numerous neighbors...what does high accessibility actually mean to me?"
 
-For this reason, we have thought of a related concept that we are provisionally calling _spatial availability_, and that we think of as a singly-constrained measure of accessibility.
+For this reason, we propose a related concept that we call _spatial availability_, and that, as we will show, is a singly-constrained measure of accessibility.
 
-How does this work? It all comes down to proportional allocation. We wish to allocate opportunities proportionally, based on the number of size of, and the distance to, the demand for opportunities.
+How does this work? It all comes down to a specific form of proportional allocation, whereby we allocate opportunities based on the size of the population, and their distance to the opportunities.
 
-This framework is appropriate for non-divisible opportunities. Examples of non-divisible opportunities are jobs (when a person takes up a job, the same job is no longer available to anyone else), seats at schools (once a seat has been taken, it is no longer available to another student). From a different perspective, employers may see workers as opportunities, but when a worker takes a job, they are no longer in the available pool of candidates.
+This framework is appropriate for indivisible opportunities. Examples of indivisible opportunities include jobs (when a person takes up a job, the same job is no longer available to anyone else) and seats at schools (once a seat has been taken, it is no longer available to another student). From a different perspective, employers may see workers as opportunities, but when a worker takes a job, they are no longer in the available pool of candidates for hiring.
 
-We distinguish between opportunities and demand.
+In this framework we distinguish between opportunities and demand. To illustrate the analytical framework, the example of accessibility to employment is illustrative, with "population" in the role of demand and "jobs" in the role of opportunities.
 
-To illustrate our analytical framework, we will think of demand as 'population' and opportunities as 'jobs'.
-
-We begin with allocation based on demand (the number of individuals in the population in the labor market). Consider an employment center $j$ with $W_j^r$ jobs of type $r$. There are also $K$ population centers in the region. To allocate the jobs proportionally based on the population of each center we define the following proportional allocation factor:
+We begin with allocation based on demand (the number of individuals in the population in the labor market). Consider an employment center $j$ with $W_j^r$ jobs of type $r$. There are also $K$ population centers in the region. To allocate the jobs proportionally based on the population of each center we define the following factor:
 $$
 f^p_{ij} = \frac{P_{i\in r}^\alpha}{\sum_{k=1}^K P_{k\in r}^\alpha}
 $$
-\noindent where $f^p_{ij}$ is a factor to proportionally allocate a share of the jobs at $j$ to population center $i$. On the right hand side of the equation, $P_{k\in r}$ is the population at location $k$ eligible for taking jobs of type $r$ (maybe those with a certain level of training, or in a designated age group). Here we add a parameter $\alpha$ that can be used to modulate the effect of size in the calculations. The summation in the bottom is over $k=1,\cdots,K$, the number of population centers in the region. The factors $f_{kj}^p$ satisfy the property that $\sum_k^{K} f^p_{kj} = 1$.
+\noindent where $f^p_{ij}$ is a factor to proportionally allocate a share of the jobs at $j$ to population center $i$. On the right hand side of the equation, $P_{k\in r}$ is the population at location $k$ that is eligible for jobs of type $r$ (maybe those with a certain level of training, or in a designated age group). Here we add a parameter $\alpha$ that can be used to modulate the effect of size in the calculations (i.e., if $\alpha <1$ employment centers draw more rapidly from small centers than from large centers, and when $\alpha>1$ employment centers draw more rapidly from large population centers). The summation in the bottom is over $k=1,\cdots,K$, the number of population centers in the region. The factors $f_{kj}^p$ satisfy the property that $\sum_k^{K} f^p_{kj} = 1$.
 
 The share of jobs allocated to (i.e., available for) each population center is:
 $$
@@ -226,16 +252,16 @@ V_{ij} = W_j\cdot \frac{f^o_{ij} \cdot f^d_{ij}}{f^o_{ij} \cdot f^d_{ij} + f^o_{
 V_{kj} = W_j\cdot \frac{f^o_{kj} \cdot f^d_{kj}}{f^o_{ij} \cdot f^d_{ij} + f^o_{ik} \cdot f^d_{ik}} = 300 \frac{\big(\frac{1}{3} \big) \big(0.574 \big)}{\big(\frac{2}{3} \big) \big(0.426 \big) + \big(\frac{1}{3} \big) \big(0.574 \big)}  = \big(300 \big)\big(\frac{0.191}{0.475} \big)= 120.6 \\
 \end{array}
 $$
-Fewer jobs are allocated to population center $i$ compared to the allocation by population size only, to account for the longer distance to reach those jobs. Considering distance alone allocated more jobs to the closer population center (i.e., $k$), but since it is smaller, it also get a smaller proportion of jobs overall. Again, the sum of jobs at employment center $j$ that are allocated to population centers $i$ and $k$ simultaneously based on _population_ and _distance_ is preserved (i.e., $W_{ij} + W_{kj} = W_j$). 
+Fewer jobs are allocated to population center $i$ compared to the allocation by population size only, to account for the longer distance to reach those jobs. On the other hand, distance alone allocated more jobs to the closer population center (i.e., $k$), but since it is smaller, it also get a smaller proportion of jobs overall. Again, the sum of jobs at employment center $j$ that are allocated to population centers $i$ and $k$ simultaneously based on _population_ and _distance_ is preserved (i.e., $W_{ij} + W_{kj} = W_j$). 
 
 Availability is the sum of available jobs by origin:
 $$
 V_i = \sum_{j=1}^J V_{ij}
 $$
 
-### 1st Use Case: Available Jobs for The Working Population
+In the following sections we use the same numerical example presented above to illustrate how availability $V_i$ is calculated. We conclude by contrasting the two measures in the final section. 
 
-In this section we present the same numerical example as presented above but additionally calculate _spatial availability_ $V_ij$. We conclude by contrasting the two measures in the final section. 
+### 1st Use Case: Available Jobs for The Working Population
 
 First we assign an impedance function:
 ```{r, warning=FALSE}
@@ -276,14 +302,14 @@ availability
 ```
 
 Join the availability to the simulated zones:
-```{r , warning=FALSE}
+```{r}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   left_join(availability, 
             by = c("id" = "Origin"))
 ```
 
 Plot the availability estimates:
-```{r, , warning=FALSE, fig.height=3, fig.width=6}
+```{r}
 toy_avail_jobs_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -300,7 +326,12 @@ toy_avail_jobs_plot <- ggplot() +
               shape = )) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1)+
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_jobs_plot
 ```
@@ -308,13 +339,13 @@ toy_avail_jobs_plot
 How do we interpret this? Accessibility is the number of jobs that can be reached at a given cost. Here, the total number of jobs is a constant. Population center 5 has the greatest availability, due to being a large population center that is moreover relatively close to jobs.
 
 Since the total number of jobs is constant, we can calculate the available jobs per person:
-```{r, warning=FALSE}
+```{r}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_jobs_per_person = avail_jobs/number)
 ```
 
 Plot the availability per person:
-```{r, warning=FALSE, fig.height=3, fig.width=6}
+```{r}
 toy_avail_jobs_person_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -329,8 +360,12 @@ toy_avail_jobs_person_plot <- ggplot() +
             filter(type == "jobs"),
           shape = 16) +
   scale_color_gradient2(midpoint = 1)+
-  guides(size = "none")
-
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_jobs_person_plot
 ```
@@ -397,19 +432,24 @@ toy_avail_workers_plot <- ggplot() +
           shape = 17) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1)+
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_workers_plot
 ```
 
 Since the total population is constant, we can calculate the available workers per job:
-```{r, warning=FALSE}
+```{r}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_workers_per_job = avail_workers/number)
 ```
 
 Plot the population availability per job:
-```{r, warning=FALSE}
+```{r}
 toy_avail_workers_job_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "jobs"),
@@ -424,7 +464,12 @@ toy_avail_workers_job_plot <- ggplot() +
             filter(type == "population"),
           shape = 17) +
   scale_color_gradient2(midpoint = 1)+
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_workers_job_plot
 ```
@@ -462,14 +507,14 @@ catchment_3 <- toy_sim_zones_access %>% filter(id == "Employment Center 3" |
   st_buffer(480)
 ```
 
-```{r, echo = FALSE}
+```{r echo = FALSE}
 # Plot catchments
 ggplot(data = toy_sim_zones_access) + 
   geom_sf(data = catchment_1,
-          fill = "yellow",
+          fill = "orange",
           alpha = 0.1) +
   geom_sf(data = catchment_1,
-          color = "yellow",
+          color = "orange",
           fill = NA) +
   geom_sf(data = catchment_2,
           fill = "blue",
@@ -490,13 +535,16 @@ ggplot(data = toy_sim_zones_access) +
                size = 3,
                nudge_y = -600) +
   scale_size(range = c(2, 7)) +
-  theme(axis.text = element_blank(),
-        legend.position = "none",
-        panel.grid = element_blank())
+  theme(legend.position = "bottom",
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 ```
 
 Calculate the proportional allocation of opportunities but now with catchment constraint (referred to as $V_ij_r$):
-```{r, , warning=FALSE}
+```{r}
 toy_od_table <- toy_od_table %>%
   mutate(V_ij_r = sp_avail(.,
                            o_id = Origin,
@@ -508,7 +556,7 @@ toy_od_table <- toy_od_table %>%
 ```
 
 Verify that the sum of all jobs allocated is consistent with the total number of jobs:
-```{r, warning=FALSE}
+```{r}
 sum(toy_od_table$V_ij_r)
 
 sum_jobs <- toy_od_table %>% group_by(Destination) %>% summarise(Jobs = mean(Jobs))
@@ -518,7 +566,7 @@ sum(sum_jobs$Jobs, na.rm = T)
 The total number of jobs is preserved.
 
 Repeat the availability calculation:
-```{r, warning=FALSE}
+```{r}
 availability <- toy_od_table %>%
   group_by(Origin) %>%
   summarize(avail_r = sum(V_ij_r))
@@ -526,20 +574,20 @@ availability
 ```
 
 Join the availability to the toy_sim_zones_access:
-```{r, warning=FALSE}
+```{r}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   left_join(availability,
             by = c("id" = "Origin"))
 ```
 
 Plot the availability estimates:
-```{r, warning=FALSE}
+```{r echo=FALSE, fig.height=6}
 toy_avail_r_plot <- ggplot() +
   geom_sf(data = catchment_1,
-          fill = "yellow",
+          fill = "orange",
           alpha = 0.05) +
   geom_sf(data = catchment_1,
-          color = "yellow",
+          color = "orange",
           fill = NA) +
   geom_sf(data = catchment_2,
           fill = "blue",
@@ -568,25 +616,30 @@ toy_avail_r_plot <- ggplot() +
               shape = )) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1)+
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_jobs_plot / toy_avail_r_plot
 ```
 
 Available jobs per person with catchment/eligibility conditions:
-```{r, warning=FALSE}
+```{r}
 toy_sim_zones_access <- toy_sim_zones_access %>%
   mutate(avail_r_per_person = avail_r/number)
 ```
 
 Plot the availability per person:
-```{r, warning=FALSE}
+```{r fig.height=9, echo=FALSE}
 toy_avail_r_person_plot <- ggplot() +
   geom_sf(data = catchment_1,
-          fill = "yellow",
+          fill = "orange",
           alpha = 0.05) +
   geom_sf(data = catchment_1,
-          color = "yellow",
+          color = "orange",
           fill = NA) +
   geom_sf(data = catchment_2,
           fill = "blue",
@@ -613,7 +666,12 @@ toy_avail_r_person_plot <- ggplot() +
             filter(type == "jobs"),
           shape = 16) +
   scale_color_gradient2(midpoint = 1)+
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_jobs_person_plot / toy_avail_r_person_plot
 ```
@@ -621,26 +679,7 @@ toy_avail_jobs_person_plot / toy_avail_r_person_plot
 ## Comparing Conventional Accessibility and Spatial Availability
 
 Below we compare the conventional accessibility and the initial _spatial availability_ use case. 
-
-```{r, warning=FALSE}
-toy_c_access_jobs_plot <- ggplot() +
-  geom_sf(data = toy_sim_zones_access %>% 
-            filter(type == "population"),
-          aes(color = c_access_jobs,
-              size = c_access_jobs),
-          shape = 17) +
-  geom_sf(data = toy_sim_zones_access %>% 
-            filter(type == "population"),
-          aes(size = c_access_jobs),
-          shape = 2) +
-  geom_sf(data = toy_sim_zones_access %>% 
-            filter(type == "jobs"),
-          aes(size = number * 3,
-              shape = )) +
-  scale_color_distiller(palette = "OrRd",
-                        direction = 1) +
-  guides(size = "none")
-
+```{r fig.height=9}
 toy_avail_jobs_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -657,12 +696,15 @@ toy_avail_jobs_plot <- ggplot() +
               shape = )) +
   scale_color_distiller(palette = "OrRd",
                         direction = 1) +
-  guides(size = "none")
+  guides(size = "none") + 
+  theme(legend.position = "bottom",axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_c_access_jobs_plot / toy_avail_jobs_plot
 ```
-
-
 
 How are the two measures different? 
 
@@ -677,7 +719,7 @@ However, ultimately if the global number of opportunities (jobs in our case) is 
 
 Additionally, it can be used to equivalently compare the accessible _spatial availability_ of opportunities for all origins globally; this is an important topic in equity analysis. For instance, considering the two remote small population centers in the top left corner it is evident that from the figure below that in one of the population centers there are _more_ jobs available than the people within the population center. 
 
-```{r, warning=FALSE}
+```{r}
 toy_avail_jobs_person_plot <- ggplot() +
   geom_sf(data = toy_sim_zones_access %>% 
             filter(type == "population"),
@@ -693,8 +735,13 @@ toy_avail_jobs_person_plot <- ggplot() +
           shape = 16,
           size = 5) +
   scale_color_gradient2(midpoint = 1)+
-  guides(size = "none")
-
+  guides(size = "none") + 
+  theme(legend.position = "bottom",
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
 
 toy_avail_jobs_person_plot
 ```
