@@ -3,5 +3,6 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   AccessPack-Conventional: AccessPack-Conventional.html
-last_built: 2021-12-04T16:58Z
+  Empirical-Example: Empirical-Example.html
+last_built: 2021-12-09T20:32Z
 

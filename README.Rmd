@@ -24,7 +24,7 @@ knitr::include_graphics("images/Greater-Golden-Horseshoe-Map.png")
 
 __Figure 1.__ _The Greater Golden Horseshoe in Ontario, Canada_
 
-This includes the location of origins and destinations defined by Traffic Analysis Zones, the number of jobs and workers at each origin and destination, travel times by car (calculated via [`r5r`](https://github.com/ipeaGIT/r5r)), the proposed **spatial availability** accessibility function (`SP_avail`), the conventional accessibility function, and developed vignettes demonstrating a toy example and the 2016 TTS data example.
+This includes the location of origins and destinations defined by Traffic Analysis Zones, the number of jobs and workers at each origin and destination, travel times by car (calculated via [`r5r`](https://github.com/ipeaGIT/r5r)), the proposed **spatial availability** accessibility function (`sp_avail`), the conventional accessibility function, and developed vignettes demonstrating a toy example and the 2016 TTS data example.
 
 # Installation
 

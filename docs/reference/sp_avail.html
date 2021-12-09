@@ -97,6 +97,9 @@
     <li>
       <a href="../articles/AccessPack-Conventional.html">AccessPack-Conventional</a>
     </li>
+    <li>
+      <a href="../articles/Empirical-Example.html">Empirical Example: GTHA Workers</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -124,7 +127,7 @@
     <p>Input OD-table with Origins, Destinations, Population, Jobs, Catchment binary identification, and a pre-calculated impedance function f</p>
     </div>
 
-    <pre class="usage"><span class='fu'>sp_avail</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>o_id</span>, <span class='va'>d_id</span>, <span class='va'>pop</span>, <span class='va'>opp</span>, r <span class='op'>=</span> <span class='cn'>NULL</span>, <span class='va'>f</span>, alpha <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>sp_avail</span><span class='op'>(</span><span class='va'>x</span>, <span class='va'>o_id</span>, <span class='va'>d_id</span>, <span class='va'>pop</span>, <span class='va'>opp</span>, <span class='va'>r</span>, <span class='va'>f</span>, alpha <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -151,7 +154,7 @@
     </tr>
     <tr>
       <th>r</th>
-      <td><p>A character string with the name of the column in data frame x that contains</p></td>
+      <td><p>The name of the column in data frame x that contains catchment restrictions, or a column of 1s if there are none</p></td>
     </tr>
     <tr>
       <th>f</th>
