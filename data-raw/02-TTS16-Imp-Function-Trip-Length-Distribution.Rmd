@@ -1,0 +1,258 @@
+---
+title: "R Notebook"
+output:
+---
+
+Load packages:
+```{r}
+library(ggplot2)
+library(dplyr)
+library(MASS)
+
+# install.packages("fitdistrplus")
+# install.packages("logspline")
+library(fitdistrplus)
+library(logspline)
+
+options(scipen = 999)
+```
+
+##-- Exploring the OD travel time data
+
+```{r}
+load(file = "TTS16-data-inputs/OD-by-FT-Employment/od_ft_tt.Rdata")
+summary(od_ft_tt)
+```
+Let's explore all the NA values...
+
+
+All NA travel times are 180 min or greater OR belong to a destination which is "external undefined" or "no usual location" or "unknown" (IDs 9998, 8888, 9999) according to the TTS data codes (source?); for the time being, lets set the trips which we know are 180 min or greater to "180min" and the other unknown destination trips to "300". We will see how it impacts the trip length distribution next chunk.
+```{r}
+od_ft_tt <- od_ft_tt %>% mutate(travel_time = ifelse( is.na(travel_time) & Destination != "9998" & Destination != "8888" & Destination != "9999", 180, travel_time),
+                                travel_time = ifelse( is.na(travel_time) & (Destination == "9998" | Destination == "8888" | Destination == "9999"), 300, travel_time))
+summary(od_ft_tt)
+```
+ 
+Trip length distribution (cutting the travel_time into 150 intervals and summing all trips within each interval). The TLD is a probability density function for likelihood of travel informed by travel time:
+```{r}
+tld <- od_ft_tt %>%
+  mutate(tt_classes = cut(travel_time, 
+                          150,
+                          ordered_result = TRUE)) %>%
+  group_by(tt_classes) %>%
+  summarize(trips = sum(trips),
+            travel_time = mean(travel_time))
+```
+
+Plot the TLD:
+```{r}
+ggplot(data = tld, 
+       aes(x =travel_time, y = trips)) +
+  geom_point()
+```
+So, the artificially assigned '180'min travel time appears to be an outlier (visually) of the distribution trend but there are signficantly more 'unknown' destination trips with an undetermined travel time (assigned to "300min"). So since this is the case, we will not re-run the OD travel time calculations for trip which are longer than 180 min as the number of trips are relatively insignificant; i.e. ~35,000 trips which is only...
+
+```{r}
+null_dest_trips_numb <- od_ft_tt %>% filter(travel_time=="300") %>% summarize(trips = sum(trips))
+totaltrip_trips_numb <- od_ft_tt %>% summarize(trips = sum(trips))
+dest_180_trips_numb <- od_ft_tt %>% filter(travel_time=="180") %>% summarize(trips = sum(trips))
+
+dest_180_trips_numb/(totaltrip_trips_numb-null_dest_trips_numb) * 100
+```
+
+0.95% of trips with known destinations! Compared to the number of unknown destination trips:
+```{r}
+null_dest_trips_numb/(totaltrip_trips_numb) * 100
+```
+which account for 10.1% of total trips. 
+
+Let's plot a guess: assigning a travel time for the trips with known destinations but uncalculated travel times; set a random travel time between 180min and 240min (3hr to 4hr!) for all travel times which have been artifically set to 180 min and plot.
+```{r}
+test <- od_ft_tt %>% mutate(travel_time = ifelse(travel_time==180, seq(from = 180, to = 240), travel_time))
+```
+
+Trip length distribution and plot:
+```{r}
+ test <- test %>%
+  mutate(tt_classes = cut(travel_time, 
+                          1000,
+                          ordered_result = TRUE)) %>%
+  group_by(tt_classes) %>%
+  summarize(trips = sum(trips),
+            travel_time = mean(travel_time))
+
+ggplot(data = test, 
+       aes(x =travel_time, y = trips)) +
+  geom_point()
+
+```
+
+It may be worth recalculating these longer travel times for completeness... but for now we move on. We will keep uncalculated travel times (greater than 180min) and thoses with unknown destinations NA. 
+
+
+```{r}
+load(file = "TTS16-data-inputs/OD-by-FT-Employment/od_ft_tt.Rdata")
+
+tld <- od_ft_tt %>%
+  mutate(tt_classes = cut(travel_time, 
+                          150,
+                          ordered_result = TRUE)) %>%
+  group_by(tt_classes) %>%
+  summarize(trips = sum(trips),
+            travel_time = mean(travel_time))
+```
+
+##-- First attempt: Fitting Impedence Function (Travel Time via Car) to Match gha TTS-2016 Trips to Work Trends
+
+TLD can be described by density functions originating form the family of the gamma distribution. It can be described by a exponential function with a negative exponent with the general form:
+$$
+y = Ae^{-\beta x} + C
+$$
+Where $y$ is number of trips and $x$ is travel time.
+
+When this equation is linearized, it takes the following form:
+$$
+log(trips) = log(A) - \beta x
+$$
+
+```{r}
+tld <- tld %>%
+  mutate(log_t = log(trips))
+```
+
+```{r}
+ggplot(data = tld,
+       aes(x = travel_time, y = log_t)) +
+  geom_point()
+```
+
+Fit a linear regression model to these data:
+```{r}
+imp_model <- lm(formula = log_t ~ travel_time, data = tld)
+summary(imp_model)
+```
+Plot the impedance function with the revised coefficients
+```{r}
+ggplot(data.frame(x = seq(1, 179, 1)) %>% mutate(f = exp(imp_model$coefficients[2] * x))) +
+  geom_line(aes(x = x,
+                y = f))
+```
+
+Compare to the earlier $\beta$ used in the example:
+```{r}
+ggplot(data.frame(x = seq(1, 179, 1)) %>% mutate(f = exp(-0.0015 * x))) +
+  geom_line(aes(x = x,
+                y = f))
+```
+
+##-- Second attempt: let's try something other than log
+
+This distribution looks like a gamma function of some sort so lets solve for that. Let's create a gamma function and try to manually adjust it to fit our data:
+```{r}
+# Generate gamma rvs
+
+x <- rgamma(1000, shape = 2, rate = 0.1)
+
+den <- density(x)
+
+dat <- data.frame(x = den$x, y = den$y)
+
+# Plot density as points
+ggplot() + 
+  geom_point(data = dat, aes(x = x, y = y), size = 3, colour="red") +
+  geom_point(data = tld, aes(x = travel_time, y = trips/sum(tld$trips))) +
+  theme_classic()
+```
+So fitting is possible with the gamma distribution. Let's try fitting it so we can extract the parameters.
+
+
+Create a numeric vector with every instance of travel_time for all ~3.0 mill trips
+```{r}
+# remove all NA trips from dataset and set all 0min travel times to 0.1min
+od_ft_tt  <- od_ft_tt %>% filter( !is.na(travel_time)) %>% mutate(travel_time = ifelse(travel_time == 0, 0.1, travel_time))
+all_tt <- od_ft_tt  %>% dplyr::select(trips, travel_time)
+
+all_tt <- all_tt[rep(seq_len(dim(all_tt)[1]), all_tt$trips), 2]
+```
+
+
+Now plot this list of travel_times in Cullen and Frey graph:
+```{r}
+descdist(data=all_tt) 
+```
+We can see that from this skewness-kurtosis graph that the observation is most similar to a lognormal distribution but also the gamma. Let's fit to a few distributions using maximum likelihood parameters and compare: **takes a few minutes**
+```{r}
+#normal_ = fitdist(data=all_tt, "norm")
+#weibull_ = fitdist(data=all_tt, "weibull")
+gamma_ = fitdist(data=all_tt, "gamma")
+#unif_ = fitdist(data=all_tt, "unif")
+# lnorm_ = fitdist(data=all_tt, "lnorm")
+#plot(normal_)
+#plot(weibull_)
+plot(gamma_)
+#plot(unif_)
+# plot(lnorm_)
+```
+The gamma actually distribution looks better; especially at predicting the longer travel times. Correspondingly, the AIC of the gamma distribution is lower too than the lognormal distribution. AIC ideals with the trade-off between the goodness of fit of the model and the simplicity of the model when comparing against candidate models; the lower the better:
+```{r}
+gamma_$aic
+# lnorm_$aic
+```
+Let's plot the TLD with the gamma theoretical distribution:
+```{r}
+
+ggplot(data = tld, aes(x = travel_time, y = trips/sum(trips))) + 
+  geom_point(size = 3) +     
+  geom_line(aes(x=travel_time, y=dgamma(travel_time, gamma_$estimate["shape"], gamma_$estimate["rate"])), 
+            color="red", size = 1) + 
+  theme_classic()
+
+```
+THe fit looks good with exception to some outliers near the peak. Let's retain the parameters for this gamma function and use it as our impedence function for this empirical dataset. 
+
+```{r}
+summary(gamma_)
+
+```
+
+Gamma function:
+$$ 
+f(x, \alpha, \beta) = \frac {x^{\alpha-1}e^{-x / \beta }} { \beta ^{\alpha}\Gamma(\alpha)} \quad \text{for }	0 \leq x \leq \infty
+$$
+where the estimated 'shape' is $$\alpha$$,the estimated 'rate' is $$\beta$$, and the $$\Gamma(\alpha) $$ is defined as:
+
+$$
+\Gamma(\alpha) =  \int_{0}^{\infty} x^{\alpha-1}e^{-x} \,dx \
+$$   
+
+Let's now calculate all values of $$f(x, \alpha, \beta)$$; this captures our theoretical cost of travel (i.e. probability of travel based on the trip-length-distribution (a PDF) of empirical trips and associated travel time).
+
+Calculating 'f':
+```{r}
+#dgamma is the density plot for gamma function
+od_ft_tt <- od_ft_tt %>%
+  mutate(f = dgamma(travel_time, gamma_$estimate["shape"], gamma_$estimate["rate"]))
+
+plot(y=od_ft_tt$f, x=od_ft_tt$travel_time)
+```
+
+---
+## Saving TTS-16 objects to folder
+```{r}
+#car travel times for all origins to all destinations trips in TTS-16, number of associated trips, the travel time, and the impedance function (theoretical gamma distribution based on empirical trips vs. travel time).
+usethis::use_data(od_ft_tt, overwrite = TRUE)
+
+# all, unique, traffic analysis zones with associated number of workers and jobs per zone
+load(file = "TTS16-data-inputs/OD-by-FT-Employment/gha_taz.Rdata")
+usethis::use_data(gha_taz, overwrite = TRUE)
+```
+```{r}
+#boundaries of interest
+load(file = "TTS16-data-inputs/Boundaries/hamilton_cma.Rdata")
+usethis::use_data(hamilton_cma, overwrite = TRUE)
+
+load(file = "TTS16-data-inputs/Boundaries/toronto_muni_bound.Rdata")
+usethis::use_data(toronto_muni_bound, overwrite = TRUE)
+```
+
+

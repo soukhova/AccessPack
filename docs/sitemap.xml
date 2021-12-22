@@ -4,13 +4,22 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/articles/A-Introducing-Spatial-Availability.html</loc>
+  </url>
+  <url>
+    <loc>/articles/B-Empirical-Example-TTS-2016.html</loc>
+  </url>
+  <url>
+    <loc>/articles/Empirical-Example-TTS-2016.html</loc>
+  </url>
+  <url>
     <loc>/articles/Empirical-Example.html</loc>
   </url>
   <url>
     <loc>/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/introducing-spatial-availability.html</loc>
+    <loc>/articles/Introducing-Spatial-Availability.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -19,10 +28,16 @@
     <loc>/index.html</loc>
   </url>
   <url>
+    <loc>/LICENSE-text.html</loc>
+  </url>
+  <url>
     <loc>/LICENSE.html</loc>
   </url>
   <url>
     <loc>/reference/AccessPack-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/gha_taz.html</loc>
   </url>
   <url>
     <loc>/reference/gtha_taz.html</loc>

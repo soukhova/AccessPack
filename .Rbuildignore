@@ -4,6 +4,7 @@
 ^README\.Rmd$
 ^data-raw$
 ^Greater-Golden-Horseshoe-Map\.png$
+^README_files$
 ^not-used-yet$
 ^docs$
 ^images$

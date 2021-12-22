@@ -2,7 +2,7 @@ pandoc: 2.14.0.3
 pkgdown: 2.0.1
 pkgdown_sha: ~
 articles:
-  Empirical-Example: Empirical-Example.html
-  introducing-spatial-availability: introducing-spatial-availability.html
-last_built: 2021-12-10T03:12Z
+  A-Introducing-Spatial-Availability: A-Introducing-Spatial-Availability.html
+  B-Empirical-Example-TTS-2016: B-Empirical-Example-TTS-2016.html
+last_built: 2021-12-22T18:59Z
 

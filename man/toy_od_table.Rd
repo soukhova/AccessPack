@@ -12,7 +12,8 @@ A dataframe containing 27 rows and 6 variables; each row represents a unique tri
 \item{Population}{The population corresponding to the "Population" ID.}
 \item{Jobs}{The number of jobs corresponding to the "Employment Center" ID.}
 \item{distance}{The distance between origin to destination (unitless).}
-\item{catchments}{A binary code indicating if the origin-destination trip is eligible or not (details on how this can be used within the vignette)).}
+\item{catchments}{A binary code indicating if the origin-destination trip is eligible or not (details on how this can be used within the vignette).}
+\item{trips}{Randomly generated number of trips made from origin to destination.}
 }
 }
 \usage{

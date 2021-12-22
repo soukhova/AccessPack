@@ -1,0 +1,282 @@
+---
+title: "2. Empirical Example: TTS 2016"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{2. Empirical Example: TTS 2016}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 7
+)
+```
+
+In this vignette we calculate both the conventional accessibility and the proposed *spatial availability* accessibility measures using the 2016 Transportation Tomorrow Survey (TTS) data for the Golden Horseshoe Area (GHA) in Ontario, Canada. We then explore these measures within the City of Toronto and compare the two calculated accessibility measures. 
+
+All data used is contained with the `AccessPack` data-package and the *spatial availability* function (`sp_avail`) is described in detail in the previous vignette.
+
+## Empircal Example Set-up
+
+Load packages needed for the example:
+```{r message = FALSE, warning = FALSE}
+library(AccessPack)
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(patchwork)
+library(sf)
+```
+
+The 'gha_taz' is a spatial object which contains the number of workers, jobs, and area (km^2) for each traffic analysis zone (TAZ), see the workers per area:
+```{r, warning = FALSE, message = FALSE, fig.height=7}
+plot_gha <- ggplot() +
+  geom_sf(data = gha_taz, 
+          aes(fill= workers/AREA), color = NA) +
+    scale_fill_distiller(palette = "Spectral", trans="sqrt") +
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+plot_gha
+```
+
+The `od_ft_tt` contains the trips made by workers to jobs (an Origin-Destination matrix). Each row contains the `origin` ID for a TAZ, the `destination` ID for a TAZ, the `trips` which are the journeys from origin to destination, `travel_time` is the travel time by car, as calculated using [`r5r`](https://github.com/ipeaGIT/r5r) for a departure of 7:00am (EST5EDT) on October 20th 2021 (a date selected at random), `f` is the impedance value. See ['data-raw' folder](https://github.com/soukhova/AccessPack/tree/master/data-raw) for data preparation .Rmd files.
+```{r, warning = FALSE, message = FALSE}
+kable(od_ft_tt %>% summary(), "html")
+```
+
+## Accessibility Analysis
+
+Using the TTS-16 dataset describe in the first vignette; let's calculate conventional accessibility using the empirical dataset. The impedance function is already defined. 
+
+Calculate accessibility:
+```{r, warning=FALSE, message=FALSE}
+#add the number of jobs and workers to the od_ft_tt matrix
+od_ft <- od_ft_tt %>% merge(gha_taz %>% select(GTA06, workers) %>% st_drop_geometry(),
+                   by.x = "Origin", by.y="GTA06", all.x = TRUE)
+
+od_ft <- od_ft %>% merge(gha_taz %>% select(GTA06, jobs) %>% st_drop_geometry(),
+                   by.x = "Destination", by.y="GTA06", all.x = TRUE)
+
+# calculate accessibility 
+c_accessibility <- od_ft %>% 
+  mutate(A_ij = f * jobs) %>%
+  group_by(Origin) %>%
+  summarise(A_i = sum(A_ij, na.rm = T),
+            trips_i = sum(trips, na.rm = T))
+```
+
+Merge accessibly calculation to the gha_taz:
+```{r, warning = FALSE, message = FALSE}
+gha_taz_acc <- AccessPack::gha_taz %>% merge(c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
+```
+
+Plot accessibility (accessible jobs in each TAZ):
+```{r, warning = FALSE, message = FALSE, fig.align = 'center'}
+plot_c_access <- ggplot() +
+  geom_sf(data = gha_taz_acc, 
+          aes(fill= A_i), color = NA) +
+  scale_fill_distiller(palette = "Spectral", trans="sqrt")+
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+
+plot_c_access
+```
+**NOTE:** Grey TAZs contain no trips from origins thus have no calculated `A_i`; 22% of TAZs are greyed out. 
+
+## Spatial Availability
+
+The impedance function is already defined, let's calculate **spatial availability** as described in the first vignette using the TTS-16 dataset :
+```{r, warning = FALSE, message = FALSE}
+od_ft <- od_ft %>%
+  mutate(catch = 1) %>%
+  mutate(V_ij = sp_avail(., 
+                         o_id = Origin,
+                         d_id = Destination,
+                         pop = workers,
+                         opp = jobs,
+                         r = catch,
+                         f = f))
+```
+
+Verify that the sum of all jobs allocated is consistent with the total number of jobs. This property of proportional allocation is one of this measure's novel contribution:
+```{r, warning = FALSE, message = FALSE}
+sum(od_ft$V_ij, na.rm=T)
+
+sum_jobs <- od_ft %>% group_by(Destination) %>% summarise(jobs = mean(jobs))
+sum(sum_jobs$jobs, na.rm = T)
+```
+The total number of jobs is preserved.
+
+Aggregate available jobs ('V_ij') by origin:
+```{r, warning = FALSE, message = FALSE}
+availability <- od_ft %>%
+  group_by(Origin) %>%
+  summarize(V_i = sum(V_ij)) 
+
+availability
+```
+Now merge accessibly calculation to the gha_taz:
+```{r, warning = FALSE, message = FALSE}
+gha_taz_acc <- gha_taz_acc %>% merge(availability, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
+```
+
+Plot *spatial availability* (accessible *available* jobs in each TAZ): 
+```{r, warning = FALSE, message = FALSE}
+plot_avail <- ggplot() +
+  geom_sf(data = gha_taz_acc, 
+          aes(fill= V_i), color = NA) +
+  scale_fill_distiller(palette = "Spectral", trans="sqrt")+
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+
+plot_avail
+```
+
+
+## Comparing Conventional Accessibility and Spatial Availability
+
+
+Plot origin conventional accessibility vs. availability (with the City of Toronto Boundary):
+```{r, warning = FALSE, message = FALSE, fig.height=14}
+plot_avail <- ggplot() +
+  geom_sf(data = gha_taz_acc, 
+          aes(fill= V_i), color = NA) +
+    scale_fill_distiller(palette = "Spectral", trans="sqrt") + 
+  geom_sf(data = AccessPack::toronto_muni_bound, colour="black", fill=NA) +
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+
+plot_c_access <- ggplot() +
+  geom_sf(data = gha_taz_acc, 
+          aes(fill= A_i), color = NA) +
+    scale_fill_distiller(palette = "Spectral", trans="sqrt") + 
+  geom_sf(data = AccessPack::toronto_muni_bound, colour="black", fill=NA)+
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+
+
+plot_avail / plot_c_access
+```
+
+- at the GHA resolution, we see here how the conventional accessibility relatively over-inflates the number of jobs available in the more densely populated (and higher number of jobs) within the Toronto area 
+
+Let's take a closer look at the measures just within the City of Toronto boundary.
+
+### City of Toronto Comparision
+As many trips are made to Toronto from outside of Toronto; the analysis must be repeated within this new boundary. 
+
+Preparing Toronto spatial data:
+```{r, warning = FALSE, message = FALSE}
+#transform CRS
+toronto_muni_bound <- st_transform(AccessPack::toronto_muni_bound, crs=32617)
+
+#select only zones within Toronto Municipality
+TO_taz <- gha_taz_acc %>%
+  filter(st_intersects(., toronto_muni_bound, sparse = FALSE)[,1]) %>% select(GTA06, AREA, jobs)
+```
+
+#### Let's first calculate conventional accessibility for Toronto:
+
+Only calculating for origins anywhere in the GHA to destinations in Toronto:
+```{r}
+#jobs at destinations IN Toronto and origins from anywhere; workers are associated with the origin (GHA) and jobs with the destination (Toronto)
+TO_od_ft <- od_ft %>% select(-V_ij) %>% filter(Destination %in% TO_taz$GTA06)
+
+#calculate accessibility for workers from any origin to jobs in Toronto 
+TO_c_accessibility <- TO_od_ft %>% 
+  mutate(TO_A_ij = f * jobs) %>%
+  group_by(Origin) %>%
+  summarise(TO_A_i = sum(TO_A_ij, na.rm = T),
+            trips_i = sum(trips, na.rm = T))
+
+#Merge TO accessibly calculation to the gha_taz:
+TO_taz_acc <- gha_taz %>% merge(TO_c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.y=T) 
+```
+
+#### Now calculated **spatial availability** for Toronto: 
+
+Again, only clculating for origins anywhere in the GHA to destinations in Toronto:
+```{r, warning = FALSE, message = FALSE}
+#calculate spatial availability
+TO_od_ft <- TO_od_ft %>%
+  mutate(TO_V_ij = sp_avail(., 
+                         o_id = Origin,
+                         d_id = Destination,
+                         pop = workers,
+                         opp = jobs,
+                         r = catch,
+                         f = f))
+```
+
+Verify that the sum of all jobs allocated is consistent with the total number of jobs. This property of proportional allocation is one of this measure's novel contribution:
+```{r, warning = FALSE, message = FALSE}
+sum(TO_od_ft$TO_V_ij, na.rm=T)
+
+sum_jobs <- TO_od_ft %>% group_by(Destination) %>% summarise(jobs = mean(jobs))
+sum(sum_jobs$jobs, na.rm = T)
+```
+The total number of jobs is preserved.
+
+Aggregate available jobs ('TO_V_ij') by origin and merge:
+```{r, warning = FALSE, message = FALSE}
+TO_availability <- TO_od_ft %>%
+  group_by(Origin) %>%
+  summarize(TO_V_i = sum(TO_V_ij)) 
+
+#Merge TO availability calculation to the TAZ sf object created for accessibility above:
+TO_taz_acc <- TO_taz_acc %>% merge(TO_availability, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
+```
+
+
+
+Plot origin conventional accessibility vs. availability for Toronto
+```{r, warning = FALSE, message = FALSE, fig.align='center', fig.height=14}
+plot_avail <- ggplot() +
+  geom_sf(data = TO_taz_acc,
+          aes(fill= TO_V_i), color = NA) +
+    scale_fill_distiller(palette = "Spectral",  trans = "sqrt")+
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+plot_c_access <- ggplot() +
+  geom_sf(data = TO_taz_acc, 
+          aes(fill= TO_A_i), color = NA) +
+    scale_fill_distiller(palette = "Spectral", trans = "sqrt")+
+    guides(size = "none") + 
+  theme(legend.position = "right",
+        panel.grid = element_blank(),
+        panel.background = element_rect(size = 1, 
+                                        color = "black", 
+                                        fill = NA))
+
+plot_avail / plot_c_access
+```
+
+
