@@ -37,8 +37,11 @@ knitr::include_graphics("man/figures/Greater-Golden-Horseshoe-Map.png")
 Installation:
 
 ``` {r, eval = FALSE}
-devtools::install_github("soukhova/AccessPack",
-                         build_vignettes = TRUE)
+if (!require("remotes", character.only = TRUE)) {
+      install.packages("remotes")
+  }
+remotes::install_github("soukhova/AccessPack",
+                        build_vignettes = TRUE)
 ```
 
 Libraries:

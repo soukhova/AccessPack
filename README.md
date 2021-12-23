@@ -42,8 +42,11 @@ length distribution.
 Installation:
 
 ``` r
-devtools::install_github("soukhova/AccessPack",
-                         build_vignettes = TRUE)
+if (!require("remotes", character.only = TRUE)) {
+      install.packages("remotes")
+  }
+remotes::install_github("soukhova/AccessPack",
+                        build_vignettes = TRUE)
 ```
 
 Libraries:
