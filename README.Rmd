@@ -26,9 +26,9 @@ This data-package, includes toy data, empirical data, the proposed **spatial ava
 
 #### What empirical data is included? 
 
-The 2016 Transportation Tomorrow Survey (TTS) data for the the Golden Horseshoe Area (GHA) in the province of Ontario, Canada (43.6°N 79.73°W) is included; specifically the location of origins and destinations defined by Traffic Analysis Zones (TAZ), the number of jobs and workers at each origin and destination, and the trips from origin to destination for the morning home-to-work commute. Also included are calculated travel times by car (calculated via [`r5r`](https://github.com/ipeaGIT/r5r)) and a derived impedance function values corresponding to the cost of travel based on the trip length distribution.
+The 2016 Transportation Tomorrow Survey (TTS) data for the the Greater Golden Horseshoe (GGH) area in the province of Ontario, Canada (43.6°N 79.73°W) is included; specifically the location of origins and destinations defined by Traffic Analysis Zones (TAZ), the number of jobs and workers at each origin and destination, and the trips from origin to destination for the morning home-to-work commute. Also included are calculated travel times by car (calculated via [`r5r`](https://github.com/ipeaGIT/r5r)) and a derived impedance function values corresponding to the cost of travel based on the trip length distribution.
 
-```{r, echo=FALSE, fig.cap="The Golden Horseshoe in Ontario, Canada.", out.height=400}
+```{r, echo=FALSE, fig.cap="The TTS study area within the sGreater Golden Horseshoe in Ontario, Canada.", out.height=400}
 knitr::include_graphics("man/figures/Greater-Golden-Horseshoe-Map.png")
 ```
 
@@ -90,7 +90,7 @@ The accessibility and **spatial availability** of this TTS 2016 data is analysed
 
 ```{r tts-workers-jobs-plot, include = FALSE, out.height=650}
 tts_workers <- ggplot() +
-  geom_sf(data = gha_taz, 
+  geom_sf(data = ggh_taz, 
           aes(fill= workers), color = NA) +
     scale_fill_distiller(palette = "Spectral", trans="sqrt")+ 
   theme(legend.position = "right", axis.text = element_blank(),
@@ -100,7 +100,7 @@ tts_workers <- ggplot() +
                                         fill = NA))
 
 tts_jobs <- ggplot() +
-  geom_sf(data = gha_taz, 
+  geom_sf(data = ggh_taz, 
           aes(fill= jobs), color = NA) +
     scale_fill_distiller(palette = "Spectral", trans="sqrt")+ 
   theme(legend.position = "right", axis.text = element_blank(),

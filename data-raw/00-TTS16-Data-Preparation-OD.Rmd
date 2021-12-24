@@ -3,7 +3,7 @@ title: "TTS Origin-Destination Data by Full-Time Employment"
 output: 
 ---
 
-In this notebook we process a cross-tabulation of origin and destinations by people employed full-time in the gha in 2016.
+In this notebook we process a cross-tabulation of origin and destinations by people employed full-time in the Greater Golden Horseshoe (GGH) in 2016.
 
 The source data is in file `tts-2016-OD-FT-Employment.txt`, which was retrieved from the Transportation Tomorrow Survey Data Retrieval System on October 28, 2021.
 
@@ -23,18 +23,18 @@ library(units)
 
 Read the boundaries of the traffic analysis zones:
 ```{r}
-gha_taz <- st_read("TTS16-data-inputs/OD-by-FT-Employment/tts06_83_region.shp")
+ggh_taz <- st_read("TTS16-data-inputs/OD-by-FT-Employment/tts06_83_region.shp")
 ```
 
 Project object:
 ```{r}
-gha_taz <- gha_taz %>%
+ggh_taz <- ggh_taz %>%
   st_transform(crs = 32617)
 ```
 
 Prepare traffic analysis zones:
 ```{r}
-gha_taz <- gha_taz %>%
+ggh_taz <- ggh_taz %>%
   transmute(GTA06 = as.character(GTA06),
             AREA = st_area(geometry) %>% 
               set_units(km^2) %>% 
@@ -43,7 +43,7 @@ gha_taz <- gha_taz %>%
 
 Extract the IDs for all TAZ:
 ```{r}
-ghta_taz_id <- gha_taz$GTA06
+ghta_taz_id <- ggh_taz$GTA06
 ```
 
 ## Origin destination matrices for work and shop
@@ -101,7 +101,7 @@ jobs_ft <- od_ft %>%
 
 Join workers and jobs to simple features object:
 ```{r}
-gha_taz <- gha_taz %>%
+ggh_taz <- ggh_taz %>%
   # Join workers
   left_join(workers_ft,
             by = "GTA06") %>%
@@ -113,19 +113,19 @@ gha_taz <- gha_taz %>%
          jobs = replace_na(jobs, 0))
 ```
 
-Plot worker population in the gha:
+Plot worker population in the ggh:
 ```{r}
 ggplot() +
-  geom_sf(data = gha_taz,
+  geom_sf(data = ggh_taz,
           aes(fill = workers),
           color = NA) +
   scale_fill_fermenter(direction = 1)
 ```
 
-Plot job distribution in the gha:
+Plot job distribution in the ggh:
 ```{r}
 ggplot() +
-  geom_sf(data = gha_taz,
+  geom_sf(data = ggh_taz,
           aes(fill = jobs),
           color = NA) +
   scale_fill_fermenter(direction = 1)
@@ -133,15 +133,15 @@ ggplot() +
 
 ## Creating input for travel-time OD calculations
 
-Create centroids for each feature in gha_taz:
+Create centroids for each feature in ggh_taz:
 ```{r}
-gha_taz_cent <- st_centroid(gha_taz) 
+ggh_taz_cent <- st_centroid(ggh_taz) 
 ```
 
 Attach the centroid point geometry to the origin object (workers) and the destination object (jobs)
 ```{r}
 #workers (origins)
-workers_ft_cent <- workers_ft %>% merge(gha_taz_cent %>% select(GTA06), by="GTA06") %>% st_sf
+workers_ft_cent <- workers_ft %>% merge(ggh_taz_cent %>% select(GTA06), by="GTA06") %>% st_sf
 
 work_origins <- cbind(workers_ft_cent, st_coordinates(st_transform(workers_ft_cent, crs = 4326))) %>%
   rename(lon = "X", lat = "Y", id = "GTA06") %>% as.data.frame()  %>%
@@ -151,7 +151,7 @@ work_origins <- cbind(workers_ft_cent, st_coordinates(st_transform(workers_ft_ce
 
 ```{r}
 #jobs (destinations)
-jobs_ft_cent <- jobs_ft %>% merge(gha_taz_cent %>% select(GTA06), by="GTA06") %>% st_sf
+jobs_ft_cent <- jobs_ft %>% merge(ggh_taz_cent %>% select(GTA06), by="GTA06") %>% st_sf
 
 job_destinations <- cbind(jobs_ft_cent, st_coordinates(st_transform(jobs_ft_cent, crs = 4326))) %>%
   rename(lon = "X", lat = "Y", id = "GTA06") %>% as.data.frame()  %>%
@@ -167,6 +167,6 @@ save("job_destinations", file = "TTS16-data-inputs/Travel-Time-Calculations/inpu
 
 ## saving inputs for later processing
 ```{r}
-save("gha_taz", file = "TTS16-data-inputs/OD-by-FT-Employment/gha_taz.Rdata")
+save("ggh_taz", file = "TTS16-data-inputs/OD-by-FT-Employment/ggh_taz.Rdata")
 save("od_ft", file = "TTS16-data-inputs/OD-by-FT-Employment/od_ft.Rdata")
 ```

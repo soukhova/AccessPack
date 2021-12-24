@@ -24,18 +24,18 @@ and **spatial availability**.
 
 #### What empirical data is included?
 
-The 2016 Transportation Tomorrow Survey (TTS) data for the the Golden
-Horseshoe Area (GHA) in the province of Ontario, Canada (43.6°N 79.73°W)
-is included; specifically the location of origins and destinations
-defined by Traffic Analysis Zones (TAZ), the number of jobs and workers
-at each origin and destination, and the trips from origin to destination
-for the morning home-to-work commute. Also included are calculated
-travel times by car (calculated via
+The 2016 Transportation Tomorrow Survey (TTS) data for the the Greater
+Golden Horseshoe (GGH) area in the province of Ontario, Canada (43.6°N
+79.73°W) is included; specifically the location of origins and
+destinations defined by Traffic Analysis Zones (TAZ), the number of jobs
+and workers at each origin and destination, and the trips from origin to
+destination for the morning home-to-work commute. Also included are
+calculated travel times by car (calculated via
 [`r5r`](https://github.com/ipeaGIT/r5r)) and a derived impedance
 function values corresponding to the cost of travel based on the trip
 length distribution.
 
-<img src="man/figures/Greater-Golden-Horseshoe-Map.png" title="The Golden Horseshoe in Ontario, Canada." alt="The Golden Horseshoe in Ontario, Canada." height="400"  />
+<img src="man/figures/Greater-Golden-Horseshoe-Map.png" title="The TTS study area within the sGreater Golden Horseshoe in Ontario, Canada." alt="The TTS study area within the sGreater Golden Horseshoe in Ontario, Canada." height="400"  />
 
 ## Setup
 
@@ -333,9 +333,6 @@ trips
 <th style="text-align:right;">
 travel_time
 </th>
-<th style="text-align:right;">
-f
-</th>
 </tr>
 </thead>
 <tbody>
@@ -352,9 +349,6 @@ f
 <td style="text-align:right;">
 24
 </td>
-<td style="text-align:right;">
-0.022
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -368,9 +362,6 @@ f
 </td>
 <td style="text-align:right;">
 20
-</td>
-<td style="text-align:right;">
-0.027
 </td>
 </tr>
 <tr>
@@ -386,9 +377,6 @@ f
 <td style="text-align:right;">
 20
 </td>
-<td style="text-align:right;">
-0.027
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -402,9 +390,6 @@ f
 </td>
 <td style="text-align:right;">
 8
-</td>
-<td style="text-align:right;">
-0.033
 </td>
 </tr>
 <tr>
@@ -420,9 +405,6 @@ f
 <td style="text-align:right;">
 17
 </td>
-<td style="text-align:right;">
-0.030
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -436,9 +418,6 @@ f
 </td>
 <td style="text-align:right;">
 18
-</td>
-<td style="text-align:right;">
-0.029
 </td>
 </tr>
 <tr>
@@ -454,9 +433,6 @@ f
 <td style="text-align:right;">
 24
 </td>
-<td style="text-align:right;">
-0.022
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -470,9 +446,6 @@ f
 </td>
 <td style="text-align:right;">
 43
-</td>
-<td style="text-align:right;">
-0.007
 </td>
 </tr>
 <tr>
@@ -488,9 +461,6 @@ f
 <td style="text-align:right;">
 62
 </td>
-<td style="text-align:right;">
-0.002
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -504,9 +474,6 @@ f
 </td>
 <td style="text-align:right;">
 65
-</td>
-<td style="text-align:right;">
-0.001
 </td>
 </tr>
 <tr>
@@ -522,9 +489,6 @@ f
 <td style="text-align:right;">
 82
 </td>
-<td style="text-align:right;">
-0.000
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -538,9 +502,6 @@ f
 </td>
 <td style="text-align:right;">
 43
-</td>
-<td style="text-align:right;">
-0.007
 </td>
 </tr>
 </tbody>
@@ -567,9 +528,6 @@ trips
 <th style="text-align:left;">
 travel_time
 </th>
-<th style="text-align:left;">
-f
-</th>
 </tr>
 </thead>
 <tbody>
@@ -577,19 +535,16 @@ f
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
 Min. : 1
 </td>
 <td style="text-align:left;">
-Min. : 0.1
-</td>
-<td style="text-align:left;">
-Min. :0.0000
+Min. : 0
 </td>
 </tr>
 <tr>
@@ -605,10 +560,7 @@ Class :character
 1st Qu.: 14
 </td>
 <td style="text-align:left;">
-1st Qu.: 13.0
-</td>
-<td style="text-align:left;">
-1st Qu.:0.0150
+1st Qu.: 13
 </td>
 </tr>
 <tr>
@@ -624,10 +576,7 @@ Mode :character
 Median : 22
 </td>
 <td style="text-align:left;">
-Median : 20.0
-</td>
-<td style="text-align:left;">
-Median :0.0259
+Median : 20
 </td>
 </tr>
 <tr>
@@ -640,13 +589,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-Mean : 31
+Mean : 33
 </td>
 <td style="text-align:left;">
-Mean : 23.4
-</td>
-<td style="text-align:left;">
-Mean :0.0228
+Mean : 23
 </td>
 </tr>
 <tr>
@@ -659,13 +605,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-3rd Qu.: 37
+3rd Qu.: 38
 </td>
 <td style="text-align:left;">
-3rd Qu.: 30.0
-</td>
-<td style="text-align:left;">
-3rd Qu.:0.0316
+3rd Qu.: 30
 </td>
 </tr>
 <tr>
@@ -681,10 +624,23 @@ NA
 Max. :1129
 </td>
 <td style="text-align:left;">
-Max. :179.0
+Max. :179
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Max. :0.0344
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA’s :3507
 </td>
 </tr>
 </tbody>

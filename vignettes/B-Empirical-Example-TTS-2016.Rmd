@@ -11,12 +11,13 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 7
+  fig.width = 7
 )
+
+options(scipen = 999)
 ```
 
-In this vignette we calculate both the conventional accessibility and the proposed *spatial availability* accessibility measures using the 2016 Transportation Tomorrow Survey (TTS) data for the Golden Horseshoe Area (GHA) in Ontario, Canada. We then explore these measures within the City of Toronto and compare the two calculated accessibility measures. 
+In this vignette we calculate both the conventional accessibility and the proposed *spatial availability* accessibility measures using the 2016 Transportation Tomorrow Survey (TTS) data for the Golden Horseshoe Area (ggh) in Ontario, Canada. We then explore these measures within the City of Toronto and compare the two calculated accessibility measures. 
 
 All data used is contained with the `AccessPack` data-package and the *spatial availability* function (`sp_avail`) is described in detail in the previous vignette.
 
@@ -30,12 +31,15 @@ library(ggplot2)
 library(kableExtra)
 library(patchwork)
 library(sf)
+library(MASS)
+library(fitdistrplus)
+library(logspline)
 ```
 
-The 'gha_taz' is a spatial object which contains the number of workers, jobs, and area (km^2) for each traffic analysis zone (TAZ), see the workers per area:
-```{r, warning = FALSE, message = FALSE, fig.height=7}
-plot_gha <- ggplot() +
-  geom_sf(data = gha_taz, 
+The 'ggh_taz' is a spatial object which contains the number of workers, jobs, and area (km^2) for each traffic analysis zone (TAZ), see the workers per area:
+```{r, warning = FALSE, message = FALSE, fig.height=6}
+plot_ggh <- ggplot() +
+  geom_sf(data = ggh_taz, 
           aes(fill= workers/AREA), color = NA) +
     scale_fill_distiller(palette = "Spectral", trans="sqrt") +
     guides(size = "none") + 
@@ -44,13 +48,136 @@ plot_gha <- ggplot() +
         panel.background = element_rect(size = 1, 
                                         color = "black", 
                                         fill = NA))
-plot_gha
+plot_ggh
 ```
 
 The `od_ft_tt` contains the trips made by workers to jobs (an Origin-Destination matrix). Each row contains the `origin` ID for a TAZ, the `destination` ID for a TAZ, the `trips` which are the journeys from origin to destination, `travel_time` is the travel time by car, as calculated using [`r5r`](https://github.com/ipeaGIT/r5r) for a departure of 7:00am (EST5EDT) on October 20th 2021 (a date selected at random), `f` is the impedance value. See ['data-raw' folder](https://github.com/soukhova/AccessPack/tree/master/data-raw) for data preparation .Rmd files.
 ```{r, warning = FALSE, message = FALSE}
 kable(od_ft_tt %>% summary(), "html")
 ```
+
+## Fitting Impedence Function (Travel Time via Car) to Match GGH TTS-2016 Trips to Work Trends
+
+Trip length distribution (cutting the travel_time into 150 intervals and summing all trips within each interval). The TLD is a probability density function for likelihood of travel informed by travel time:
+
+```{r, warning=FALSE, message=FALSE}
+tld <- od_ft_tt %>%
+  mutate(tt_classes = cut(travel_time, 
+                          150,
+                          ordered_result = TRUE)) %>%
+  group_by(tt_classes) %>%
+  summarize(trips = sum(trips),
+            travel_time = mean(travel_time))
+```
+
+Plot the TLD:
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(data = tld, 
+       aes(x =travel_time, y = trips)) +
+  ylim(0, 225000) +
+  geom_point()+
+  theme_classic()
+```
+
+As seen, the trip length distribution (TLD) of the TTS 2016 appears to follow a gamma distribution:
+
+```{r, warning=FALSE, message=FALSE}
+# Generate a random variates which follow a gamma distribution
+x <- rgamma(1000, shape = 2, rate = 0.1)
+
+# Covert to probability density function (PDF)
+den <- density(x)
+dat <- data.frame(x = den$x, y = den$y)
+
+# Plot density as points
+ggplot() + 
+  geom_point(data = dat, aes(x = x, y = y), size = 3, colour="red") +
+  geom_point(data = tld, aes(x = travel_time, y = trips/sum(trips))) +
+  ylim(0, 0.08) +
+  theme_classic()
+```
+
+Let's see if gamma is the most approrpiate distribution; to do this first a vector with every instance of travel_time for all ~3.0 mill trips is created:
+
+```{r}
+# remove all NA trips from dataset and set all 0min travel times to 0.1min
+od_ft_tt  <- od_ft_tt %>% filter( !is.na(travel_time)) %>% mutate(travel_time = ifelse(travel_time == 0, 0.1, travel_time))
+all_tt <- od_ft_tt  %>% dplyr::select(trips, travel_time)
+
+all_tt <- all_tt[rep(seq_len(dim(all_tt)[1]), all_tt$trips), 2]
+```
+
+
+Next this vector of travel_times are plotted in a Cullen and Frey graph:
+
+```{r, warning=FALSE, message=FALSE, fig.height=6}
+descdist(data=all_tt) 
+```
+We can see that from this skewness-kurtosis graph that the observation is most similar to a lognormal distribution but also the gamma. Let's fit try fitting the vector to these two distributions using maximum likelihood estimation and compare:
+
+```{r, warning=FALSE, message=FALSE, fig.width=7}
+# using fitdist package to fit a distribution using the default maximum liklihood estimation method and Nelder-Mead method for direct optimization
+gamma_ <- fitdist(data=all_tt, "gamma", method="mle", optim.method="Nelder-Mead")
+lnorm_ <- fitdist(data=all_tt, "lnorm", method="mle", optim.method="Nelder-Mead")
+norm_<-fitdist(data=all_tt, "norm", method="mle", optim.method="Nelder-Mead")
+exp_<-fitdist(data=all_tt, "exp", method="mle", optim.method="Nelder-Mead")
+```
+
+```{r, echo=FALSE, eval=FALSE}
+plot(gamma_)
+plot(lnorm_)
+```
+
+```{r, echo=FALSE, out.height="80%", out.width="90%", fig.align='center'}
+knitr::include_graphics("images/gamma_comp.png")
+knitr::include_graphics("images/lnorm_comp.png")
+```
+
+The gamma distribution fit looks more accurate; especially at predicting the longer travel times. Correspondingly, goodness of fit criteria such as the Akaike information criterion (AIC) and Bayesian information criterion (BIC) for the gamma distribution (along with lognormal and exponential and normal distribution for reference) are calculated. The AIC and BIC measure the trade-off between the goodness of fit of the model and the simplicity of the model when comparing against candidate models; a model which looks like a good fit but has a high AIC and BIC value indicates issues of overfitting thus the lower the value the better the candidate model:
+
+```{r, warning=FALSE, message=FALSE} 
+Distribution <-  c("Gamma", "Exp", "Lognormal", "Normal")
+AIC <- c(gamma_$aic, exp_$aic, lnorm_$aic, norm_$aic)
+BIC <- c(gamma_$bic, exp_$bic, lnorm_$bic, norm_$bic)
+df <- data.frame(Distribution, AIC, BIC)
+kable(df, "html")
+```
+
+Let's plot the TLD with the gamma theoretical distribution:
+
+```{r, warning=FALSE, message=FALSE}
+ggplot(data = tld, aes(x = travel_time, y = trips/sum(trips))) + 
+  geom_point(size = 3) +     
+  geom_line(aes(x=travel_time, y=dgamma(travel_time, gamma_$estimate["shape"], gamma_$estimate["rate"])), 
+            color="red", size = 1) + 
+  theme_classic()
+
+```
+The fit looks good with exception to some outliers near the peak. Let's retain the parameters for this gamma function and use it as our impedance function for the TTS 2016 dataset:
+
+```{r}
+kable(gamma_ %>% coef(), "html")
+```
+
+Gamma function:
+$$ 
+f(x, \alpha, \beta) = \frac {x^{\alpha-1}e^{-x / \beta }} { \beta ^{\alpha}\Gamma(\alpha)} \quad \text{for }	0 \leq x \leq \infty
+$$
+where the estimated 'shape' is $\alpha$,the estimated 'rate' is $\beta$, and the $\Gamma(\alpha) $ is defined as:
+
+$$
+\Gamma(\alpha) =  \int_{0}^{\infty} x^{\alpha-1}e^{-x} \,dx \
+$$   
+
+Let's now add the values of $f(x, \alpha, \beta)$ to the OD table as a column named 'f'. As a point of summary, 'f' captures our theoretical cost of travel (i.e. probability of travel based on the trip-length-distribution (a PDF) of empirical trips and associated travel time).
+
+```{r}
+#dgamma is the density plot for gamma function
+od_ft_tt <- od_ft_tt %>%
+  mutate(f = dgamma(travel_time, gamma_$estimate["shape"], gamma_$estimate["rate"]))
+```
+
 
 ## Accessibility Analysis
 
@@ -59,10 +186,10 @@ Using the TTS-16 dataset describe in the first vignette; let's calculate convent
 Calculate accessibility:
 ```{r, warning=FALSE, message=FALSE}
 #add the number of jobs and workers to the od_ft_tt matrix
-od_ft <- od_ft_tt %>% merge(gha_taz %>% select(GTA06, workers) %>% st_drop_geometry(),
+od_ft <- od_ft_tt %>% merge(ggh_taz %>% dplyr::select(GTA06, workers) %>% st_drop_geometry(),
                    by.x = "Origin", by.y="GTA06", all.x = TRUE)
 
-od_ft <- od_ft %>% merge(gha_taz %>% select(GTA06, jobs) %>% st_drop_geometry(),
+od_ft <- od_ft %>% merge(ggh_taz %>% dplyr::select(GTA06, jobs) %>% st_drop_geometry(),
                    by.x = "Destination", by.y="GTA06", all.x = TRUE)
 
 # calculate accessibility 
@@ -73,15 +200,15 @@ c_accessibility <- od_ft %>%
             trips_i = sum(trips, na.rm = T))
 ```
 
-Merge accessibly calculation to the gha_taz:
+Merge accessibly calculation to the ggh_taz:
 ```{r, warning = FALSE, message = FALSE}
-gha_taz_acc <- AccessPack::gha_taz %>% merge(c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
+ggh_taz_acc <- ggh_taz %>% merge(c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
 ```
 
 Plot accessibility (accessible jobs in each TAZ):
-```{r, warning = FALSE, message = FALSE, fig.align = 'center'}
+```{r, warning = FALSE, message = FALSE, fig.height=6}
 plot_c_access <- ggplot() +
-  geom_sf(data = gha_taz_acc, 
+  geom_sf(data = ggh_taz_acc, 
           aes(fill= A_i), color = NA) +
   scale_fill_distiller(palette = "Spectral", trans="sqrt")+
     guides(size = "none") + 
@@ -124,18 +251,16 @@ Aggregate available jobs ('V_ij') by origin:
 availability <- od_ft %>%
   group_by(Origin) %>%
   summarize(V_i = sum(V_ij)) 
-
-availability
 ```
-Now merge accessibly calculation to the gha_taz:
+Now merge accessibly calculation to the ggh_taz:
 ```{r, warning = FALSE, message = FALSE}
-gha_taz_acc <- gha_taz_acc %>% merge(availability, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
+ggh_taz_acc <- ggh_taz_acc %>% merge(availability, by.x=c("GTA06"), by.y=c("Origin"), all.x=T) 
 ```
 
 Plot *spatial availability* (accessible *available* jobs in each TAZ): 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, fig.height=6}
 plot_avail <- ggplot() +
-  geom_sf(data = gha_taz_acc, 
+  geom_sf(data = ggh_taz_acc, 
           aes(fill= V_i), color = NA) +
   scale_fill_distiller(palette = "Spectral", trans="sqrt")+
     guides(size = "none") + 
@@ -153,9 +278,9 @@ plot_avail
 
 
 Plot origin conventional accessibility vs. availability (with the City of Toronto Boundary):
-```{r, warning = FALSE, message = FALSE, fig.height=14}
+```{r, warning = FALSE, message = FALSE, fig.height=12}
 plot_avail <- ggplot() +
-  geom_sf(data = gha_taz_acc, 
+  geom_sf(data = ggh_taz_acc, 
           aes(fill= V_i), color = NA) +
     scale_fill_distiller(palette = "Spectral", trans="sqrt") + 
   geom_sf(data = AccessPack::toronto_muni_bound, colour="black", fill=NA) +
@@ -167,7 +292,7 @@ plot_avail <- ggplot() +
                                         fill = NA))
 
 plot_c_access <- ggplot() +
-  geom_sf(data = gha_taz_acc, 
+  geom_sf(data = ggh_taz_acc, 
           aes(fill= A_i), color = NA) +
     scale_fill_distiller(palette = "Spectral", trans="sqrt") + 
   geom_sf(data = AccessPack::toronto_muni_bound, colour="black", fill=NA)+
@@ -182,7 +307,7 @@ plot_c_access <- ggplot() +
 plot_avail / plot_c_access
 ```
 
-- at the GHA resolution, we see here how the conventional accessibility relatively over-inflates the number of jobs available in the more densely populated (and higher number of jobs) within the Toronto area 
+- at the ggh resolution, we see here how the conventional accessibility relatively over-inflates the number of jobs available in the more densely populated (and higher number of jobs) within the Toronto area 
 
 Let's take a closer look at the measures just within the City of Toronto boundary.
 
@@ -195,16 +320,16 @@ Preparing Toronto spatial data:
 toronto_muni_bound <- st_transform(AccessPack::toronto_muni_bound, crs=32617)
 
 #select only zones within Toronto Municipality
-TO_taz <- gha_taz_acc %>%
-  filter(st_intersects(., toronto_muni_bound, sparse = FALSE)[,1]) %>% select(GTA06, AREA, jobs)
+TO_taz <- ggh_taz_acc %>%
+  filter(st_intersects(., toronto_muni_bound, sparse = FALSE)[,1]) %>% dplyr::select(GTA06, AREA, jobs)
 ```
 
-#### Let's first calculate conventional accessibility for Toronto:
+#### Calculate accessibility for Toronto:
 
-Only calculating for origins anywhere in the GHA to destinations in Toronto:
+Only calculating for origins anywhere in the ggh to destinations in Toronto:
 ```{r}
-#jobs at destinations IN Toronto and origins from anywhere; workers are associated with the origin (GHA) and jobs with the destination (Toronto)
-TO_od_ft <- od_ft %>% select(-V_ij) %>% filter(Destination %in% TO_taz$GTA06)
+#jobs at destinations IN Toronto and origins from anywhere; workers are associated with the origin (ggh) and jobs with the destination (Toronto)
+TO_od_ft <- od_ft %>% dplyr::select(-V_ij) %>% filter(Destination %in% TO_taz$GTA06)
 
 #calculate accessibility for workers from any origin to jobs in Toronto 
 TO_c_accessibility <- TO_od_ft %>% 
@@ -213,13 +338,13 @@ TO_c_accessibility <- TO_od_ft %>%
   summarise(TO_A_i = sum(TO_A_ij, na.rm = T),
             trips_i = sum(trips, na.rm = T))
 
-#Merge TO accessibly calculation to the gha_taz:
-TO_taz_acc <- gha_taz %>% merge(TO_c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.y=T) 
+#Merge TO accessibly calculation to the ggh_taz:
+TO_taz_acc <- ggh_taz %>% merge(TO_c_accessibility, by.x=c("GTA06"), by.y=c("Origin"), all.y=T) 
 ```
 
 #### Now calculated **spatial availability** for Toronto: 
 
-Again, only clculating for origins anywhere in the GHA to destinations in Toronto:
+Again, only clculating for origins anywhere in the ggh to destinations in Toronto:
 ```{r, warning = FALSE, message = FALSE}
 #calculate spatial availability
 TO_od_ft <- TO_od_ft %>%
@@ -254,7 +379,7 @@ TO_taz_acc <- TO_taz_acc %>% merge(TO_availability, by.x=c("GTA06"), by.y=c("Ori
 
 
 Plot origin conventional accessibility vs. availability for Toronto
-```{r, warning = FALSE, message = FALSE, fig.align='center', fig.height=14}
+```{r, warning = FALSE, message = FALSE, fig.align='center', fig.height=12}
 plot_avail <- ggplot() +
   geom_sf(data = TO_taz_acc,
           aes(fill= TO_V_i), color = NA) +

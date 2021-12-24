@@ -81,7 +81,7 @@
 
     
     
-<p>In this vignette we calculate both the conventional accessibility and the proposed <em>spatial availability</em> accessibility measures using the 2016 Transportation Tomorrow Survey (TTS) data for the Golden Horseshoe Area (GHA) in Ontario, Canada. We then explore these measures within the City of Toronto and compare the two calculated accessibility measures.</p>
+<p>In this vignette we calculate both the conventional accessibility and the proposed <em>spatial availability</em> accessibility measures using the 2016 Transportation Tomorrow Survey (TTS) data for the Golden Horseshoe Area (ggh) in Ontario, Canada. We then explore these measures within the City of Toronto and compare the two calculated accessibility measures.</p>
 <p>All data used is contained with the <code>AccessPack</code> data-package and the <em>spatial availability</em> function (<code>sp_avail</code>) is described in detail in the previous vignette.</p>
 <div class="section level2">
 <h2 id="empircal-example-set-up">Empircal Example Set-up<a class="anchor" aria-label="anchor" href="#empircal-example-set-up"></a>
@@ -93,11 +93,14 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://haozhu233.github.io/kableExtra/" class="external-link">kableExtra</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></code></pre></div>
-<p>The ‘gha_taz’ is a spatial object which contains the number of workers, jobs, and area (km^2) for each traffic analysis zone (TAZ), see the workers per area:</p>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.stats.ox.ac.uk/pub/MASS4/" class="external-link">MASS</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lbbe.univ-lyon1.fr/fr/fitdistrplus" class="external-link">fitdistrplus</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">logspline</span><span class="op">)</span></code></pre></div>
+<p>The ‘ggh_taz’ is a spatial object which contains the number of workers, jobs, and area (km^2) for each traffic analysis zone (TAZ), see the workers per area:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">plot_gha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gha_taz</span>, 
+<code class="sourceCode R"><span class="va">plot_ggh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ggh_taz</span>, 
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">workers</span><span class="op">/</span><span class="va">AREA</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_distiller</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Spectral"</span>, trans<span class="op">=</span><span class="st">"sqrt"</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>size <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> 
@@ -106,7 +109,7 @@
         panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1</span>, 
                                         color <span class="op">=</span> <span class="st">"black"</span>, 
                                         fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
-<span class="va">plot_gha</span></code></pre></div>
+<span class="va">plot_ggh</span></code></pre></div>
 <p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
 <p>The <code>od_ft_tt</code> contains the trips made by workers to jobs (an Origin-Destination matrix). Each row contains the <code>origin</code> ID for a TAZ, the <code>destination</code> ID for a TAZ, the <code>trips</code> which are the journeys from origin to destination, <code>travel_time</code> is the travel time by car, as calculated using <a href="https://github.com/ipeaGIT/r5r" class="external-link"><code>r5r</code></a> for a departure of 7:00am (EST5EDT) on October 20th 2021 (a date selected at random), <code>f</code> is the impedance value. See <a href="https://github.com/soukhova/AccessPack/tree/master/data-raw" class="external-link">‘data-raw’ folder</a> for data preparation .Rmd files.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -127,28 +130,22 @@ trips
 <th style="text-align:left;">
 travel_time
 </th>
-<th style="text-align:left;">
-f
-</th>
 </tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
 Min. : 1.00
 </td>
 <td style="text-align:left;">
-Min. : 0.10
-</td>
-<td style="text-align:left;">
-Min. :8.000e-08
+Min. : 0.00
 </td>
 </tr>
 <tr>
@@ -166,9 +163,6 @@ Class :character
 <td style="text-align:left;">
 1st Qu.: 13.00
 </td>
-<td style="text-align:left;">
-1st Qu.:1.502e-02
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -185,9 +179,6 @@ Median : 22.00
 <td style="text-align:left;">
 Median : 20.00
 </td>
-<td style="text-align:left;">
-Median :2.590e-02
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -199,14 +190,11 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-Mean : 30.83
+Mean : 33.44
 </td>
 <td style="text-align:left;">
 Mean : 23.39
 </td>
-<td style="text-align:left;">
-Mean :2.282e-02
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -218,13 +206,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-3rd Qu.: 37.00
+3rd Qu.: 38.00
 </td>
 <td style="text-align:left;">
 3rd Qu.: 30.00
-</td>
-<td style="text-align:left;">
-3rd Qu.:3.160e-02
 </td>
 </tr>
 <tr>
@@ -242,24 +227,215 @@ Max. :1129.00
 <td style="text-align:left;">
 Max. :179.00
 </td>
+</tr>
+<tr>
 <td style="text-align:left;">
-Max. :3.436e-02
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA’s :3507
 </td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level2">
+<h2 id="fitting-impedence-function-travel-time-via-car-to-match-ggh-tts-2016-trips-to-work-trends">Fitting Impedence Function (Travel Time via Car) to Match GGH TTS-2016 Trips to Work Trends<a class="anchor" aria-label="anchor" href="#fitting-impedence-function-travel-time-via-car-to-match-ggh-tts-2016-trips-to-work-trends"></a>
+</h2>
+<p>Trip length distribution (cutting the travel_time into 150 intervals and summing all trips within each interval). The TLD is a probability density function for likelihood of travel informed by travel time:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">tld</span> <span class="op">&lt;-</span> <span class="va">od_ft_tt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>tt_classes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">travel_time</span>, 
+                          <span class="fl">150</span>,
+                          ordered_result <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">tt_classes</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>trips <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">trips</span><span class="op">)</span>,
+            travel_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">travel_time</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p>Plot the TLD:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">tld</span>, 
+       <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span><span class="va">travel_time</span>, y <span class="op">=</span> <span class="va">trips</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">225000</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
+<p>As seen, the trip length distribution (TLD) of the TTS 2016 appears to follow a gamma distribution:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Generate a random variates which follow a gamma distribution</span>
+<span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="fl">1000</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>
+
+<span class="co"># Covert to probability density function (PDF)</span>
+<span class="va">den</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+<span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">den</span><span class="op">$</span><span class="va">x</span>, y <span class="op">=</span> <span class="va">den</span><span class="op">$</span><span class="va">y</span><span class="op">)</span>
+
+<span class="co"># Plot density as points</span>
+<span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">3</span>, colour<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">tld</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">travel_time</span>, y <span class="op">=</span> <span class="va">trips</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">trips</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.08</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-7-1.png" width="672"></p>
+<p>Let’s see if gamma is the most approrpiate distribution; to do this first a vector with every instance of travel_time for all ~3.0 mill trips is created:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># remove all NA trips from dataset and set all 0min travel times to 0.1min</span>
+<span class="va">od_ft_tt</span>  <span class="op">&lt;-</span> <span class="va">od_ft_tt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">travel_time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>travel_time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">travel_time</span> <span class="op">==</span> <span class="fl">0</span>, <span class="fl">0.1</span>, <span class="va">travel_time</span><span class="op">)</span><span class="op">)</span>
+<span class="va">all_tt</span> <span class="op">&lt;-</span> <span class="va">od_ft_tt</span>  <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">trips</span>, <span class="va">travel_time</span><span class="op">)</span>
+
+<span class="va">all_tt</span> <span class="op">&lt;-</span> <span class="va">all_tt</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">all_tt</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>, <span class="va">all_tt</span><span class="op">$</span><span class="va">trips</span><span class="op">)</span>, <span class="fl">2</span><span class="op">]</span></code></pre></div>
+<p>Next this vector of travel_times are plotted in a Cullen and Frey graph:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/fitdistrplus/man/descdist.html" class="external-link">descdist</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">all_tt</span><span class="op">)</span> </code></pre></div>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
+<pre><code><span class="co">#&gt; summary statistics</span>
+<span class="co">#&gt; ------</span>
+<span class="co">#&gt; min:  0.1   max:  179 </span>
+<span class="co">#&gt; median:  18 </span>
+<span class="co">#&gt; mean:  21.4344 </span>
+<span class="co">#&gt; estimated sd:  14.61254 </span>
+<span class="co">#&gt; estimated skewness:  1.703326 </span>
+<span class="co">#&gt; estimated kurtosis:  8.353363</span></code></pre>
+<p>We can see that from this skewness-kurtosis graph that the observation is most similar to a lognormal distribution but also the gamma. Let’s fit try fitting the vector to these two distributions using maximum likelihood estimation and compare:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># using fitdist package to fit a distribution using the default maximum liklihood estimation method and Nelder-Mead method for direct optimization</span>
+<span class="va">gamma_</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/fitdistrplus/man/fitdist.html" class="external-link">fitdist</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">all_tt</span>, <span class="st">"gamma"</span>, method<span class="op">=</span><span class="st">"mle"</span>, optim.method<span class="op">=</span><span class="st">"Nelder-Mead"</span><span class="op">)</span>
+<span class="va">lnorm_</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/fitdistrplus/man/fitdist.html" class="external-link">fitdist</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">all_tt</span>, <span class="st">"lnorm"</span>, method<span class="op">=</span><span class="st">"mle"</span>, optim.method<span class="op">=</span><span class="st">"Nelder-Mead"</span><span class="op">)</span>
+<span class="va">norm_</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/fitdistrplus/man/fitdist.html" class="external-link">fitdist</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">all_tt</span>, <span class="st">"norm"</span>, method<span class="op">=</span><span class="st">"mle"</span>, optim.method<span class="op">=</span><span class="st">"Nelder-Mead"</span><span class="op">)</span>
+<span class="va">exp_</span><span class="op">&lt;-</span><span class="fu"><a href="https://rdrr.io/pkg/fitdistrplus/man/fitdist.html" class="external-link">fitdist</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">all_tt</span>, <span class="st">"exp"</span>, method<span class="op">=</span><span class="st">"mle"</span>, optim.method<span class="op">=</span><span class="st">"Nelder-Mead"</span><span class="op">)</span></code></pre></div>
+<p><img src="../../../../../../OneDrive%20-%20McMaster%20University/05.%20PhD%20Research/02.%20MJ/003_Access%20Measures-Package/AccessPack/articles/images/gamma_comp.png" width="90%" height="80%" style="display: block; margin: auto;"><img src="../../../../../../OneDrive%20-%20McMaster%20University/05.%20PhD%20Research/02.%20MJ/003_Access%20Measures-Package/AccessPack/articles/images/lnorm_comp.png" width="90%" height="80%" style="display: block; margin: auto;"></p>
+<p>The gamma distribution fit looks more accurate; especially at predicting the longer travel times. Correspondingly, goodness of fit criteria such as the Akaike information criterion (AIC) and Bayesian information criterion (BIC) for the gamma distribution (along with lognormal and exponential and normal distribution for reference) are calculated. The AIC and BIC measure the trade-off between the goodness of fit of the model and the simplicity of the model when comparing against candidate models; a model which looks like a good fit but has a high AIC and BIC value indicates issues of overfitting thus the lower the value the better the candidate model:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">Distribution</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gamma"</span>, <span class="st">"Exp"</span>, <span class="st">"Lognormal"</span>, <span class="st">"Normal"</span><span class="op">)</span>
+<span class="va">AIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">gamma_</span><span class="op">$</span><span class="va">aic</span>, <span class="va">exp_</span><span class="op">$</span><span class="va">aic</span>, <span class="va">lnorm_</span><span class="op">$</span><span class="va">aic</span>, <span class="va">norm_</span><span class="op">$</span><span class="va">aic</span><span class="op">)</span>
+<span class="va">BIC</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">gamma_</span><span class="op">$</span><span class="va">bic</span>, <span class="va">exp_</span><span class="op">$</span><span class="va">bic</span>, <span class="va">lnorm_</span><span class="op">$</span><span class="va">bic</span>, <span class="va">norm_</span><span class="op">$</span><span class="va">bic</span><span class="op">)</span>
+<span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">Distribution</span>, <span class="va">AIC</span>, <span class="va">BIC</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">df</span>, <span class="st">"html"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<thead><tr>
+<th style="text-align:left;">
+Distribution
+</th>
+<th style="text-align:right;">
+AIC
+</th>
+<th style="text-align:right;">
+BIC
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Gamma
+</td>
+<td style="text-align:right;">
+24225802
+</td>
+<td style="text-align:right;">
+24225828
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Exp
+</td>
+<td style="text-align:right;">
+24955352
+</td>
+<td style="text-align:right;">
+24955365
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lognormal
+</td>
+<td style="text-align:right;">
+25165432
+</td>
+<td style="text-align:right;">
+25165458
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Normal
+</td>
+<td style="text-align:right;">
+25175263
+</td>
+<td style="text-align:right;">
+25175289
+</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s plot the TLD with the gamma theoretical distribution:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">tld</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">travel_time</span>, y <span class="op">=</span> <span class="va">trips</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">trips</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span>     
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">travel_time</span>, y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">travel_time</span>, <span class="va">gamma_</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"shape"</span><span class="op">]</span>, <span class="va">gamma_</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"rate"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>, 
+            color<span class="op">=</span><span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span> 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-14-1.png" width="672"> The fit looks good with exception to some outliers near the peak. Let’s retain the parameters for this gamma function and use it as our impedance function for the TTS 2016 dataset:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">gamma_</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"html"</span><span class="op">)</span></code></pre></div>
+<table class="table">
+<thead><tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+shape
+</td>
+<td style="text-align:right;">
+2.0188480
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rate
+</td>
+<td style="text-align:right;">
+0.0941675
+</td>
+</tr>
+</tbody>
+</table>
+<p>Gamma function: <span class="math display">\[ 
+f(x, \alpha, \beta) = \frac {x^{\alpha-1}e^{-x / \beta }} { \beta ^{\alpha}\Gamma(\alpha)} \quad \text{for }    0 \leq x \leq \infty
+\]</span> where the estimated ‘shape’ is <span class="math inline">\(\alpha\)</span>,the estimated ‘rate’ is <span class="math inline">\(\beta\)</span>, and the $() $ is defined as:</p>
+<p><span class="math display">\[
+\Gamma(\alpha) =  \int_{0}^{\infty} x^{\alpha-1}e^{-x} \,dx \
+\]</span></p>
+<p>Let’s now add the values of <span class="math inline">\(f(x, \alpha, \beta)\)</span> to the OD table as a column named ‘f’. As a point of summary, ‘f’ captures our theoretical cost of travel (i.e. probability of travel based on the trip-length-distribution (a PDF) of empirical trips and associated travel time).</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#dgamma is the density plot for gamma function</span>
+<span class="va">od_ft_tt</span> <span class="op">&lt;-</span> <span class="va">od_ft_tt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>f <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span><span class="op">(</span><span class="va">travel_time</span>, <span class="va">gamma_</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"shape"</span><span class="op">]</span>, <span class="va">gamma_</span><span class="op">$</span><span class="va">estimate</span><span class="op">[</span><span class="st">"rate"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="accessibility-analysis">Accessibility Analysis<a class="anchor" aria-label="anchor" href="#accessibility-analysis"></a>
 </h2>
 <p>Using the TTS-16 dataset describe in the first vignette; let’s calculate conventional accessibility using the empirical dataset. The impedance function is already defined.</p>
 <p>Calculate accessibility:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">#add the number of jobs and workers to the od_ft_tt matrix</span>
-<span class="va">od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft_tt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">gha_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">workers</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span>,
+<span class="va">od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft_tt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">ggh_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">workers</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span>,
                    by.x <span class="op">=</span> <span class="st">"Origin"</span>, by.y<span class="op">=</span><span class="st">"GTA06"</span>, all.x <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
-<span class="va">od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">gha_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">jobs</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span>,
+<span class="va">od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">ggh_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">jobs</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="op">)</span>,
                    by.x <span class="op">=</span> <span class="st">"Destination"</span>, by.y<span class="op">=</span><span class="st">"GTA06"</span>, all.x <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="co"># calculate accessibility </span>
@@ -268,13 +444,13 @@ Max. :3.436e-02
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Origin</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>A_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">A_ij</span>, na.rm <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>,
             trips_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">trips</span>, na.rm <span class="op">=</span> <span class="cn">T</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Merge accessibly calculation to the gha_taz:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">gha_taz_acc</span> <span class="op">&lt;-</span> <span class="fu">AccessPack</span><span class="fu">::</span><span class="va"><a href="../reference/gha_taz.html">gha_taz</a></span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">c_accessibility</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.x<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
+<p>Merge accessibly calculation to the ggh_taz:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ggh_taz_acc</span> <span class="op">&lt;-</span> <span class="va">ggh_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">c_accessibility</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.x<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
 <p>Plot accessibility (accessible jobs in each TAZ):</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot_c_access</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gha_taz_acc</span>, 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ggh_taz_acc</span>, 
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">A_i</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_distiller</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Spectral"</span>, trans<span class="op">=</span><span class="st">"sqrt"</span><span class="op">)</span><span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>size <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> 
@@ -285,13 +461,13 @@ Max. :3.436e-02
                                         fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">plot_c_access</span></code></pre></div>
-<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;"><strong>NOTE:</strong> Grey TAZs contain no trips from origins thus have no calculated <code>A_i</code>; 22% of TAZs are greyed out.</p>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-19-1.png" width="672"><strong>NOTE:</strong> Grey TAZs contain no trips from origins thus have no calculated <code>A_i</code>; 22% of TAZs are greyed out.</p>
 </div>
 <div class="section level2">
 <h2 id="spatial-availability">Spatial Availability<a class="anchor" aria-label="anchor" href="#spatial-availability"></a>
 </h2>
 <p>The impedance function is already defined, let’s calculate <strong>spatial availability</strong> as described in the first vignette using the TTS-16 dataset :</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>catch <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>V_ij <span class="op">=</span> <span class="fu"><a href="../reference/sp_avail.html">sp_avail</a></span><span class="op">(</span><span class="va">.</span>, 
@@ -302,7 +478,7 @@ Max. :3.436e-02
                          r <span class="op">=</span> <span class="va">catch</span>,
                          f <span class="op">=</span> <span class="va">f</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Verify that the sum of all jobs allocated is consistent with the total number of jobs. This property of proportional allocation is one of this measure’s novel contribution:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">od_ft</span><span class="op">$</span><span class="va">V_ij</span>, na.rm<span class="op">=</span><span class="cn">T</span><span class="op">)</span>
 <span class="co">#&gt; [1] 3073846</span>
 
@@ -311,33 +487,17 @@ Max. :3.436e-02
 <span class="co">#&gt; [1] 3073846</span></code></pre></div>
 <p>The total number of jobs is preserved.</p>
 <p>Aggregate available jobs (‘V_ij’) by origin:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">availability</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Origin</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>V_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">V_ij</span><span class="op">)</span><span class="op">)</span> 
-
-<span class="va">availability</span>
-<span class="co">#&gt; <span style="color: #949494;"># A tibble: 2,928 x 2</span></span>
-<span class="co">#&gt;    Origin        V_i</span>
-<span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1       351.     </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 100     905.     </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1001      0.008<span style="text-decoration: underline;">81</span></span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1002    132.     </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 1003      7.38   </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 1007      0.321  </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 1008      0.920  </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 101    <span style="text-decoration: underline;">1</span>917.     </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 1011      0.996  </span>
-<span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 1012      0.774  </span>
-<span class="co">#&gt; <span style="color: #949494;"># ... with 2,918 more rows</span></span></code></pre></div>
-<p>Now merge accessibly calculation to the gha_taz:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">gha_taz_acc</span> <span class="op">&lt;-</span> <span class="va">gha_taz_acc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">availability</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.x<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>V_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">V_ij</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
+<p>Now merge accessibly calculation to the ggh_taz:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ggh_taz_acc</span> <span class="op">&lt;-</span> <span class="va">ggh_taz_acc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">availability</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.x<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
 <p>Plot <em>spatial availability</em> (accessible <em>available</em> jobs in each TAZ):</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot_avail</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gha_taz_acc</span>, 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ggh_taz_acc</span>, 
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">V_i</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_distiller</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Spectral"</span>, trans<span class="op">=</span><span class="st">"sqrt"</span><span class="op">)</span><span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>size <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> 
@@ -348,15 +508,15 @@ Max. :3.436e-02
                                         fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">plot_avail</span></code></pre></div>
-<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-12-1.png" width="672"></p>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-24-1.png" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="comparing-conventional-accessibility-and-spatial-availability">Comparing Conventional Accessibility and Spatial Availability<a class="anchor" aria-label="anchor" href="#comparing-conventional-accessibility-and-spatial-availability"></a>
 </h2>
 <p>Plot origin conventional accessibility vs. availability (with the City of Toronto Boundary):</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot_avail</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gha_taz_acc</span>, 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ggh_taz_acc</span>, 
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">V_i</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_distiller</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Spectral"</span>, trans<span class="op">=</span><span class="st">"sqrt"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu">AccessPack</span><span class="fu">::</span><span class="va"><a href="../reference/toronto_muni_bound.html">toronto_muni_bound</a></span>, colour<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
@@ -368,7 +528,7 @@ Max. :3.436e-02
                                         fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">plot_c_access</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">gha_taz_acc</span>, 
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">ggh_taz_acc</span>, 
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">A_i</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_distiller</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Spectral"</span>, trans<span class="op">=</span><span class="st">"sqrt"</span><span class="op">)</span> <span class="op">+</span> 
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="fu">AccessPack</span><span class="fu">::</span><span class="va"><a href="../reference/toronto_muni_bound.html">toronto_muni_bound</a></span>, colour<span class="op">=</span><span class="st">"black"</span>, fill<span class="op">=</span><span class="cn">NA</span><span class="op">)</span><span class="op">+</span>
@@ -381,9 +541,9 @@ Max. :3.436e-02
 
 
 <span class="va">plot_avail</span> <span class="op">/</span> <span class="va">plot_c_access</span></code></pre></div>
-<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-13-1.png" width="672"></p>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-25-1.png" width="672"></p>
 <ul>
-<li>at the GHA resolution, we see here how the conventional accessibility relatively over-inflates the number of jobs available in the more densely populated (and higher number of jobs) within the Toronto area</li>
+<li>at the ggh resolution, we see here how the conventional accessibility relatively over-inflates the number of jobs available in the more densely populated (and higher number of jobs) within the Toronto area</li>
 </ul>
 <p>Let’s take a closer look at the measures just within the City of Toronto boundary.</p>
 <div class="section level3">
@@ -391,20 +551,20 @@ Max. :3.436e-02
 </h3>
 <p>As many trips are made to Toronto from outside of Toronto; the analysis must be repeated within this new boundary.</p>
 <p>Preparing Toronto spatial data:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">#transform CRS</span>
 <span class="va">toronto_muni_bound</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fu">AccessPack</span><span class="fu">::</span><span class="va"><a href="../reference/toronto_muni_bound.html">toronto_muni_bound</a></span>, crs<span class="op">=</span><span class="fl">32617</span><span class="op">)</span>
 
 <span class="co">#select only zones within Toronto Municipality</span>
-<span class="va">TO_taz</span> <span class="op">&lt;-</span> <span class="va">gha_taz_acc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html" class="external-link">st_intersects</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">toronto_muni_bound</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">AREA</span>, <span class="va">jobs</span><span class="op">)</span></code></pre></div>
+<span class="va">TO_taz</span> <span class="op">&lt;-</span> <span class="va">ggh_taz_acc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html" class="external-link">st_intersects</a></span><span class="op">(</span><span class="va">.</span>, <span class="va">toronto_muni_bound</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">GTA06</span>, <span class="va">AREA</span>, <span class="va">jobs</span><span class="op">)</span></code></pre></div>
 <div class="section level4">
-<h4 id="lets-first-calculate-conventional-accessibility-for-toronto">Let’s first calculate conventional accessibility for Toronto:<a class="anchor" aria-label="anchor" href="#lets-first-calculate-conventional-accessibility-for-toronto"></a>
+<h4 id="calculate-accessibility-for-toronto">Calculate accessibility for Toronto:<a class="anchor" aria-label="anchor" href="#calculate-accessibility-for-toronto"></a>
 </h4>
-<p>Only calculating for origins anywhere in the GHA to destinations in Toronto:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">#jobs at destinations IN Toronto and origins from anywhere; workers are associated with the origin (GHA) and jobs with the destination (Toronto)</span>
-<span class="va">TO_od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">V_ij</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Destination</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">TO_taz</span><span class="op">$</span><span class="va">GTA06</span><span class="op">)</span>
+<p>Only calculating for origins anywhere in the ggh to destinations in Toronto:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">#jobs at destinations IN Toronto and origins from anywhere; workers are associated with the origin (ggh) and jobs with the destination (Toronto)</span>
+<span class="va">TO_od_ft</span> <span class="op">&lt;-</span> <span class="va">od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">V_ij</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Destination</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">TO_taz</span><span class="op">$</span><span class="va">GTA06</span><span class="op">)</span>
 
 <span class="co">#calculate accessibility for workers from any origin to jobs in Toronto </span>
 <span class="va">TO_c_accessibility</span> <span class="op">&lt;-</span> <span class="va">TO_od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> 
@@ -413,14 +573,14 @@ Max. :3.436e-02
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>TO_A_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">TO_A_ij</span>, na.rm <span class="op">=</span> <span class="cn">T</span><span class="op">)</span>,
             trips_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">trips</span>, na.rm <span class="op">=</span> <span class="cn">T</span><span class="op">)</span><span class="op">)</span>
 
-<span class="co">#Merge TO accessibly calculation to the gha_taz:</span>
-<span class="va">TO_taz_acc</span> <span class="op">&lt;-</span> <span class="va">gha_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">TO_c_accessibility</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.y<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
+<span class="co">#Merge TO accessibly calculation to the ggh_taz:</span>
+<span class="va">TO_taz_acc</span> <span class="op">&lt;-</span> <span class="va">ggh_taz</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">TO_c_accessibility</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.y<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="now-calculated-spatial-availability-for-toronto">Now calculated <strong>spatial availability</strong> for Toronto:<a class="anchor" aria-label="anchor" href="#now-calculated-spatial-availability-for-toronto"></a>
 </h4>
-<p>Again, only clculating for origins anywhere in the GHA to destinations in Toronto:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<p>Again, only clculating for origins anywhere in the ggh to destinations in Toronto:</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">#calculate spatial availability</span>
 <span class="va">TO_od_ft</span> <span class="op">&lt;-</span> <span class="va">TO_od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>TO_V_ij <span class="op">=</span> <span class="fu"><a href="../reference/sp_avail.html">sp_avail</a></span><span class="op">(</span><span class="va">.</span>, 
@@ -431,7 +591,7 @@ Max. :3.436e-02
                          r <span class="op">=</span> <span class="va">catch</span>,
                          f <span class="op">=</span> <span class="va">f</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Verify that the sum of all jobs allocated is consistent with the total number of jobs. This property of proportional allocation is one of this measure’s novel contribution:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">TO_od_ft</span><span class="op">$</span><span class="va">TO_V_ij</span>, na.rm<span class="op">=</span><span class="cn">T</span><span class="op">)</span>
 <span class="co">#&gt; [1] 1318359</span>
 
@@ -440,7 +600,7 @@ Max. :3.436e-02
 <span class="co">#&gt; [1] 1318359</span></code></pre></div>
 <p>The total number of jobs is preserved.</p>
 <p>Aggregate available jobs (‘TO_V_ij’) by origin and merge:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">TO_availability</span> <span class="op">&lt;-</span> <span class="va">TO_od_ft</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Origin</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarize</a></span><span class="op">(</span>TO_V_i <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">TO_V_ij</span><span class="op">)</span><span class="op">)</span> 
@@ -448,7 +608,7 @@ Max. :3.436e-02
 <span class="co">#Merge TO availability calculation to the TAZ sf object created for accessibility above:</span>
 <span class="va">TO_taz_acc</span> <span class="op">&lt;-</span> <span class="va">TO_taz_acc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">TO_availability</span>, by.x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GTA06"</span><span class="op">)</span>, by.y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Origin"</span><span class="op">)</span>, all.x<span class="op">=</span><span class="cn">T</span><span class="op">)</span> </code></pre></div>
 <p>Plot origin conventional accessibility vs. availability for Toronto</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">plot_avail</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">TO_taz_acc</span>,
           <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill<span class="op">=</span> <span class="va">TO_V_i</span><span class="op">)</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
@@ -471,7 +631,7 @@ Max. :3.436e-02
                                         fill <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span>
 
 <span class="va">plot_avail</span> <span class="op">/</span> <span class="va">plot_c_access</span></code></pre></div>
-<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;"></p>
+<p><img src="B-Empirical-Example-TTS-2016_files/figure-html/unnamed-chunk-31-1.png" width="672" style="display: block; margin: auto;"></p>
 </div>
 </div>
 </div>

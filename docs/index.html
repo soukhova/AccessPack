@@ -81,16 +81,19 @@
 <div class="section level4">
 <h4 id="what-empirical-data-is-included">What empirical data is included?<a class="anchor" aria-label="anchor" href="#what-empirical-data-is-included"></a>
 </h4>
-<p>The 2016 Transportation Tomorrow Survey (TTS) data for the the Golden Horseshoe Area (GHA) in the province of Ontario, Canada (43.6°N 79.73°W) is included; specifically the location of origins and destinations defined by Traffic Analysis Zones (TAZ), the number of jobs and workers at each origin and destination, and the trips from origin to destination for the morning home-to-work commute. Also included are calculated travel times by car (calculated via <a href="https://github.com/ipeaGIT/r5r" class="external-link"><code>r5r</code></a>) and a derived impedance function values corresponding to the cost of travel based on the trip length distribution.</p>
-<p><img src="reference/figures/Greater-Golden-Horseshoe-Map.png" title="The Golden Horseshoe in Ontario, Canada." alt="The Golden Horseshoe in Ontario, Canada." height="400"></p>
+<p>The 2016 Transportation Tomorrow Survey (TTS) data for the the Greater Golden Horseshoe (GGH) area in the province of Ontario, Canada (43.6°N 79.73°W) is included; specifically the location of origins and destinations defined by Traffic Analysis Zones (TAZ), the number of jobs and workers at each origin and destination, and the trips from origin to destination for the morning home-to-work commute. Also included are calculated travel times by car (calculated via <a href="https://github.com/ipeaGIT/r5r" class="external-link"><code>r5r</code></a>) and a derived impedance function values corresponding to the cost of travel based on the trip length distribution.</p>
+<p><img src="reference/figures/Greater-Golden-Horseshoe-Map.png" title="The TTS study area within the sGreater Golden Horseshoe in Ontario, Canada." alt="The TTS study area within the sGreater Golden Horseshoe in Ontario, Canada." height="400"></p>
 </div>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
 <p>Installation:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"soukhova/AccessPack"</span>,
-                         build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span>, character.only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
+      <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>
+  <span class="op">}</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"soukhova/AccessPack"</span>,
+                        build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>Libraries:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">AccessPack</span><span class="op">)</span>
@@ -360,9 +363,6 @@ trips
 <th style="text-align:right;">
 travel_time
 </th>
-<th style="text-align:right;">
-f
-</th>
 </tr></thead>
 <tbody>
 <tr>
@@ -378,9 +378,6 @@ f
 <td style="text-align:right;">
 24
 </td>
-<td style="text-align:right;">
-0.022
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -394,9 +391,6 @@ f
 </td>
 <td style="text-align:right;">
 20
-</td>
-<td style="text-align:right;">
-0.027
 </td>
 </tr>
 <tr>
@@ -412,9 +406,6 @@ f
 <td style="text-align:right;">
 20
 </td>
-<td style="text-align:right;">
-0.027
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -428,9 +419,6 @@ f
 </td>
 <td style="text-align:right;">
 8
-</td>
-<td style="text-align:right;">
-0.033
 </td>
 </tr>
 <tr>
@@ -446,9 +434,6 @@ f
 <td style="text-align:right;">
 17
 </td>
-<td style="text-align:right;">
-0.030
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -462,9 +447,6 @@ f
 </td>
 <td style="text-align:right;">
 18
-</td>
-<td style="text-align:right;">
-0.029
 </td>
 </tr>
 <tr>
@@ -480,9 +462,6 @@ f
 <td style="text-align:right;">
 24
 </td>
-<td style="text-align:right;">
-0.022
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -496,9 +475,6 @@ f
 </td>
 <td style="text-align:right;">
 43
-</td>
-<td style="text-align:right;">
-0.007
 </td>
 </tr>
 <tr>
@@ -514,9 +490,6 @@ f
 <td style="text-align:right;">
 62
 </td>
-<td style="text-align:right;">
-0.002
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -530,9 +503,6 @@ f
 </td>
 <td style="text-align:right;">
 65
-</td>
-<td style="text-align:right;">
-0.001
 </td>
 </tr>
 <tr>
@@ -548,9 +518,6 @@ f
 <td style="text-align:right;">
 82
 </td>
-<td style="text-align:right;">
-0.000
-</td>
 </tr>
 <tr>
 <td style="text-align:left;">
@@ -564,9 +531,6 @@ f
 </td>
 <td style="text-align:right;">
 43
-</td>
-<td style="text-align:right;">
-0.007
 </td>
 </tr>
 </tbody>
@@ -588,28 +552,22 @@ trips
 <th style="text-align:left;">
 travel_time
 </th>
-<th style="text-align:left;">
-f
-</th>
 </tr></thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
-Length:99569
+Length:103076
 </td>
 <td style="text-align:left;">
 Min. : 1
 </td>
 <td style="text-align:left;">
-Min. : 0.1
-</td>
-<td style="text-align:left;">
-Min. :0.0000
+Min. : 0
 </td>
 </tr>
 <tr>
@@ -625,10 +583,7 @@ Class :character
 1st Qu.: 14
 </td>
 <td style="text-align:left;">
-1st Qu.: 13.0
-</td>
-<td style="text-align:left;">
-1st Qu.:0.0150
+1st Qu.: 13
 </td>
 </tr>
 <tr>
@@ -644,10 +599,7 @@ Mode :character
 Median : 22
 </td>
 <td style="text-align:left;">
-Median : 20.0
-</td>
-<td style="text-align:left;">
-Median :0.0259
+Median : 20
 </td>
 </tr>
 <tr>
@@ -660,13 +612,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-Mean : 31
+Mean : 33
 </td>
 <td style="text-align:left;">
-Mean : 23.4
-</td>
-<td style="text-align:left;">
-Mean :0.0228
+Mean : 23
 </td>
 </tr>
 <tr>
@@ -679,13 +628,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-3rd Qu.: 37
+3rd Qu.: 38
 </td>
 <td style="text-align:left;">
-3rd Qu.: 30.0
-</td>
-<td style="text-align:left;">
-3rd Qu.:0.0316
+3rd Qu.: 30
 </td>
 </tr>
 <tr>
@@ -701,10 +647,23 @@ NA
 Max. :1129
 </td>
 <td style="text-align:left;">
-Max. :179.0
+Max. :179
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 </td>
 <td style="text-align:left;">
-Max. :0.0344
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA’s :3507
 </td>
 </tr>
 </tbody>
