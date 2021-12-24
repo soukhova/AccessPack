@@ -118,12 +118,12 @@ exp_ <- fitdistrplus::fitdist(data=all_tt, "exp", method="mle", optim.method="Ne
 
 ```{r c8a, echo=FALSE, out.height="80%", out.width="90%", fig.align='center'}
 # plot(gamma_)
-knitr::include_graphics("images/g-2.png")
+# knitr::include_graphics("images/g-2.png")
 ```
 
 ```{r c8b, echo=FALSE, out.height="80%", out.width="90%", fig.align='center'}
 # plot(lnorm_)
-knitr::include_graphics("images/lno-3.png")
+# knitr::include_graphics("images/lno-3.png")
 ```
 
 
