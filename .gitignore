@@ -15,3 +15,6 @@ data-raw/TTS16-data-inputs/Travel-Time-Calculations/r5_graph/osm.pbf.mapdb
 data-raw/TTS16-data-inputs/Travel-Time-Calculations/r5_graph/osm.pbf.mapdb.p
 data-raw/TTS16-data-inputs/Travel-Time-Calculations/results/output_OD_car1.Rdata
 data-raw/TTS16-data-inputs/Travel-Time-Calculations/df/Orig/.metadata/meta.json
+/doc/
+/Meta/
+docs
