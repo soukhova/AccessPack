@@ -5,10 +5,6 @@ vignette: >
   %\VignetteIndexEntry{2. Empirical Example: TTS 2016}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-resource_files:
-  - images/g-2.png
-  - images/lno-3.png
-  - images/figure-1.png
 ---
 
 ```{r, include = FALSE}
