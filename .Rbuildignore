@@ -1,14 +1,9 @@
-^AccessPack\.Rproj$
+^AccessPack2\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$
 ^data-raw$
-^Greater-Golden-Horseshoe-Map\.png$
-^README_files$
-^not-used-yet$
-^docs$
-^images$
-^doc$
-^Meta$
+^\.github$
 ^_pkgdown\.yml$
+^docs$
 ^pkgdown$

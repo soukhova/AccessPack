@@ -9,8 +9,8 @@ NULL
 
 #' AccessPack: A package with a function to calculate _spatial availability_, an
 #'  accessibility measure which proportionally allocates (singly-constraints) opportunity
-#'  supply to available opportunity seekers, and two sample datasets related to workers and jobs.
-#'  One dataset is a hypothetical toy example and the other dataset is trip data for workers and jobs
+#'  supply to available opportunity seekers, and two sample data sets related to workers and jobs.
+#'  One dataset is a hypothetical toy example and the other data set is trip data for workers and jobs
 #'  retained from the Transportation Tomorrow Survey (TTS) 2016 in the Greater Golden Horseshoe (GGH) area.
 #'
 #' @docType package
