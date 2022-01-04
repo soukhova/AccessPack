@@ -3,7 +3,7 @@ Title: Spatial Availability Function and Sample Datasets including Real-World 20
 Version: 0.0.0.9000
 Authors@R: 
     c(person("Anastasia", "Soukhov", , "soukhoa@mcmaster.ca", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID")),
+           comment = c(ORCID = "0000-0003-4371-4831")),
       person("Antonio", "Paez", , "paezha@mcmaster.ca", role = c("aut"),
            comment = c(ORCID = "0000-0001-6912-9919")))
 Description: This repository contains working files for a data-package to accompany the newly proposed  _proportionally allocated_ accessibility measure referred to as **spatial availability**. This measure is within the family of transport planning accessibility measures. This data-package is used in the  **Spatial Availability Measure** manuscript [here](https://github.com/soukhova/Spatial-Availability-Measure) (current a work in progress). 
