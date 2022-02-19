@@ -84,7 +84,7 @@ ggplot() +
   theme_classic()
 ```
 
-Let's see if gamma is the most approrpiate distribution; to do this first a vector with every instance of travel_time for all ~3.0 mill trips is created:
+Let's see if gamma is the most appropriate distribution; to do this first a vector with every instance of travel_time for all ~3.0 mill trips is created:
 
 ```{r c4}
 # remove all NA trips from dataset and set all 0min travel times to 0.1min
