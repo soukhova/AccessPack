@@ -12,7 +12,7 @@ This repository contains working files for a data-package to accompany the newly
 \url{https://github.com/soukhova/Spatial-Availability-Measures-Package}
 }
 \author{
-\strong{Maintainer}: Anastasia Soukhov \email{soukhoa@mcmaster.ca} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Anastasia Soukhov \email{soukhoa@mcmaster.ca} (\href{https://orcid.org/0000-0003-4371-4831}{ORCID})
 
 Authors:
 \itemize{
